@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
@@ -23,7 +23,7 @@ class PipelineSpec(BaseModel):
     orchestrator: Optional[str] = Field(
         default=None, description="Optional orchestrator backend: 'strands' or None for local"
     )
-    stages: List[Union[StageConfig, Dict[str, Any]]] = Field(default_factory=list)
+    stages: List[StageConfig] = Field(default_factory=list)
 
     @field_validator("stages", mode="before")
     @classmethod
