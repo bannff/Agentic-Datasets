@@ -14,8 +14,11 @@ def chunk_conversation(
     max_tokens: int = 512,
     overlap: int = 50,
 ) -> List[ConversationRecord]:
+    # Provide a safe default encoding name for Pylance type checker; TokenTextSplitter can infer
+    # from model_name internally, but the signature requires a str for encoding_name.
+    encoding = "cl100k_base"
     splitter = TokenTextSplitter(
-        encoding_name=None,  # let splitter infer from model_name if needed
+        encoding_name=encoding,
         model_name=model_name,
         chunk_size=max_tokens,
         chunk_overlap=overlap,

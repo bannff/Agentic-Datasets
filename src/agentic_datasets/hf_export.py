@@ -8,7 +8,10 @@ from huggingface_hub import create_repo, upload_file
 
 
 def jsonl_to_dataset(path: Path) -> Dataset:
-    return load_dataset("json", data_files=str(path), split="train")
+    ds = load_dataset("json", data_files=str(path), split="train")
+    # load_dataset with a split returns a Dataset
+    assert isinstance(ds, Dataset)
+    return ds
 
 
 def ensure_repo(repo_id: str, private: bool = False) -> None:

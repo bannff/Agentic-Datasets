@@ -53,7 +53,7 @@ def chunk(
     max_tokens: int = typer.Option(512, help="Max tokens per chunk"),
     overlap: int = typer.Option(50, help="Token overlap between chunks"),
 ):
-    cfg = PipelineConfig(input_path=input_path, output_path=output_path)
+    cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=None)
     recs = normalize(ingest(cfg.input_path))
     chunked = chunk_dataset(recs, model_name=model_name, max_tokens=max_tokens, overlap=overlap)
     export(chunked, cfg.output_path)
@@ -65,6 +65,7 @@ def run_config(
     config_path: Path = typer.Argument(..., help="YAML pipeline config file"),
 ):
     spec = load_spec(config_path)
+    # run_spec handles max_records inside spec
     out = run_spec(spec)
     typer.echo(f"Pipeline completed: {out}")
 

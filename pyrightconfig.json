@@ -2,7 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
   "venvPath": ".",
   "venv": ".venv",
-  "pythonVersion": "3.11",
+  "pythonVersion": "3.9",
+  "executionEnvironments": [
+    { "root": "./src" }
+  ],
   "typeCheckingMode": "basic",
   "reportMissingImports": "warning",
   "reportMissingTypeStubs": "none",

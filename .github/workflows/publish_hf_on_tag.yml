@@ -1,0 +1,28 @@
+name: Publish to Hugging Face on Tag
+
+on:
+  push:
+    tags:
+      - "dataset-*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Validate publish variables
+        run: |
+          test -n "${{ vars.PUBLISH_ENTRY_ID }}" || (echo "Missing repo variable: PUBLISH_ENTRY_ID" && exit 1)
+          test -n "${{ vars.PUBLISH_REPO_ID }}" || (echo "Missing repo variable: PUBLISH_REPO_ID" && exit 1)
+          test -n "${{ vars.PUBLISH_DATA_PATH }}" || (echo "Missing repo variable: PUBLISH_DATA_PATH" && exit 1)
+      - name: Publish dataset to Hugging Face
+        run: |
+          export HUGGINGFACE_HUB_TOKEN="${{ secrets.HUGGINGFACE_HUB_TOKEN }}"
+          python -m agentic_datasets.cli hf:push "${{ vars.PUBLISH_ENTRY_ID }}" "${{ vars.PUBLISH_REPO_ID }}" "${{ vars.PUBLISH_DATA_PATH }}"

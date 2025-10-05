@@ -27,14 +27,30 @@ Examples:
 - Smoke (Docker image): .github/workflows/smoke.yml
 - Docker build/push to GHCR: .github/workflows/docker.yml
 - Publish to Hugging Face (manual): .github/workflows/publish_hf.yml
+- Publish to Hugging Face on tag: .github/workflows/publish_hf_on_tag.yml
+ - Run pipeline on-demand (cloud): .github/workflows/run_pipeline.yml
 
 Repo secret required for publish: HUGGINGFACE_HUB_TOKEN
+
+Auto-publish on tag (optional):
+- Add repository Variables: PUBLISH_ENTRY_ID (catalog entry id), PUBLISH_REPO_ID (e.g., your-org/your-dataset), PUBLISH_DATA_PATH (path to JSONL to publish)
+- Push a tag named dataset-<anything> (e.g., dataset-2025-10-05)
+- The workflow will run and call: agentic-datasets hf:push "$PUBLISH_ENTRY_ID" "$PUBLISH_REPO_ID" "$PUBLISH_DATA_PATH"
 
 ## Codespaces
 
 Devcontainer is included (.devcontainer/devcontainer.json). Open in Codespaces to get a ready-to-run environment.
 
 ## Notes
+## Cloud-first: run pipelines in Actions
+
+You can execute pipelines without Docker or local Python by triggering the on-demand workflow:
+
+1. Go to GitHub → Actions → "Run Agentic Pipeline (on-demand)"
+2. Click "Run workflow" and provide a YAML config path (default: examples/pipeline.example.yaml)
+3. The job installs dependencies, runs the pipeline, and uploads any out*.jsonl files as artifacts
+
+For publishing to HF, use the manual workflow (publish_hf.yml) or tag-triggered one (publish_hf_on_tag.yml).
 
 - See `README_AGENTIC.md` for a brief CLI reference.
 - Legacy/large directories are archived; see `docs/LEGACY.md`.
