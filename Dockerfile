@@ -11,10 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY pyproject.toml /app/
-RUN pip install --upgrade pip && \
-    pip install .[dev]
-
 COPY src /app/src
+RUN pip install --upgrade pip && \
+    pip install -e .
 COPY examples /app/examples
 COPY catalog.yaml /app/catalog.yaml
 

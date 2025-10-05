@@ -1,5 +1,10 @@
 # Agentic Datasets
 
+![CI](https://github.com/bannff/datasets/actions/workflows/ci.yml/badge.svg)
+![Smoke](https://github.com/bannff/datasets/actions/workflows/smoke.yml/badge.svg)
+![Docker](https://github.com/bannff/datasets/actions/workflows/docker.yml/badge.svg)
+![Run Pipeline](https://github.com/bannff/datasets/actions/workflows/run_pipeline.yml/badge.svg)
+
 Config-driven pipelines for building agentic, multi-turn datasets with chunking, validation, optional tool-call execution, and Hugging Face publishing. Includes CLI, tests, CI, Docker image, and Codespaces devcontainer.
 
 ## Quickstart
