@@ -1,0 +1,49 @@
+name: Nightly Pipeline
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      config_path:
+        description: Override YAML pipeline config path
+        required: false
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Run pipeline
+        run: |
+          DEFAULT_CONFIG="${{ vars.NIGHTLY_CONFIG_PATH }}"
+          CONFIG_PATH="${{ inputs.config_path }}"
+          if [ -z "$CONFIG_PATH" ]; then
+            CONFIG_PATH="${DEFAULT_CONFIG:-examples/pipeline.example.yaml}"
+          fi
+          echo "Using pipeline config: $CONFIG_PATH"
+          python -m agentic_datasets.cli run-config "$CONFIG_PATH"
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-outputs
+          path: |
+            examples/out*.jsonl
+            **/out*.jsonl
+      - name: Optional publish to HF
+        run: |
+          # Publish only if variables are present; use bash env expansion at runtime
+          if [ -n "${PUBLISH_ENTRY_ID:-}" ] && [ -n "${PUBLISH_REPO_ID:-}" ] && [ -n "${PUBLISH_DATA_PATH:-}" ]; then
+            export HUGGINGFACE_HUB_TOKEN="${HUGGINGFACE_HUB_TOKEN:-}"
+            python -m agentic_datasets.cli hf:push "$PUBLISH_ENTRY_ID" "$PUBLISH_REPO_ID" "$PUBLISH_DATA_PATH"
+          else
+            echo "Skipping publish: PUBLISH_* variables not set"
+          fi
