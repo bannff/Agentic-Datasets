@@ -1,0 +1,8 @@
+entries:
+  - id: sample-conversations
+    name: Sample Conversations
+    version: 0.1.0
+    description: Small sample dataset for demonstrating the agentic-datasets pipeline.
+    license: other
+    tags: [agentic, conversations, sample]
+    local_path: examples/sample.jsonl

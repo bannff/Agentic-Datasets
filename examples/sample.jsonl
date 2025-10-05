@@ -1,0 +1,2 @@
+{"messages":[{"role":"user","content":"Hello world."},{"role":"assistant","content":"Hi there, how can I help?"}],"id":"ex-1"}
+{"messages":[{"role":"user","content":"This is a very long message that will be repeated many times to test chunking. "} ,{"role":"assistant","content":"Acknowledged."}],"id":"ex-2"}

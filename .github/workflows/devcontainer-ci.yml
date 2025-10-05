@@ -1,0 +1,22 @@
+name: Devcontainer CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build devcontainer
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            pip install -e .[dev]
+            ruff check src tests
+            pytest -q --maxfail=1 --disable-warnings

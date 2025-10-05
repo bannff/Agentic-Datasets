@@ -1,0 +1,72 @@
+ [build-system]
+ requires = ["setuptools>=68", "wheel"]
+ build-backend = "setuptools.build_meta"
+
+ [project]
+ name = "agentic-datasets"
+ version = "0.1.0"
+ description = "Agentic, multi-turn dataset pipeline and catalog"
+ readme = "README.md"
+ authors = [
+   { name = "Daniel Rodrigo" }
+ ]
+ license = { text = "MIT" }
+requires-python = ">=3.9"
+ dependencies = [
+   "typer>=0.12",
+   "pydantic>=2.4",
+   "pyyaml>=6.0",
+   "datasets>=2.18.0",
+   "huggingface_hub>=0.24.0",
+   "tiktoken>=0.7",
+   "datasketch>=1.6",
+  "langchain-text-splitters>=0.3.0",
+ ]
+
+ [project.optional-dependencies]
+ dev = [
+   "pytest>=7.4",
+   "pytest-cov>=4.1",
+   "ruff>=0.5",
+   "black>=24.4",
+   "mypy>=1.10",
+ ]
+
+ orchestration = [
+   "strands",               # Strands SDK (sdk-python)
+   "strands-agents-tools",  # Community tools package
+ ]
+
+ [project.scripts]
+ agentic-datasets = "agentic_datasets.cli:app"
+
+ [tool.black]
+ line-length = 100
+
+[tool.ruff]
+line-length = 100
+exclude = [
+  ".venv",
+  "archive",
+  "scripts",
+  "cybersecurity_datasets",
+  "cybersecurity_finetuned_models",
+  "PyScience",
+]
+
+[tool.ruff.lint]
+extend-select = ["E", "F"]
+extend-ignore = ["E501"]
+
+ [tool.mypy]
+python_version = "3.9"
+ strict = true
+ warn_unused_ignores = true
+ warn_redundant_casts = true
+ warn_return_any = true
+ warn_unreachable = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+python_files = ["test_*.py"]

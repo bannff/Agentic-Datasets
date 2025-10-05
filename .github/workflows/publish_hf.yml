@@ -1,0 +1,36 @@
+name: Publish Dataset to Hugging Face
+
+on:
+  workflow_dispatch:
+    inputs:
+      entry_id:
+        description: Catalog entry id (for dataset card)
+        required: true
+      repo_id:
+        description: HF dataset repo id (org/name)
+        required: true
+      data_path:
+        description: Path to JSONL to upload
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Sanity check CLI import
+        run: |
+          python -c "import agentic_datasets,sys;print('agentic_datasets ok', sys.version)"
+      - name: Push
+        env:
+          HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
+        run: |
+          python -m agentic_datasets.cli hf:push "${{ inputs.entry_id }}" "${{ inputs.repo_id }}" "${{ inputs.data_path }}"

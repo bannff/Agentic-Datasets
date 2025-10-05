@@ -1,0 +1,12 @@
+input: examples/sample.jsonl
+output: examples/out.agentic.jsonl
+orchestrator: strands
+stages:
+  - name: s2m
+  - name: apigenmt
+  - name: reviewinstruct
+  - name: chunk
+    params:
+      model_name: gpt-4o-mini
+      max_tokens: 256
+      overlap: 32

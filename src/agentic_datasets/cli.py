@@ -1,0 +1,113 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Optional
+
+import typer
+
+from .config import PipelineConfig
+from .pipeline import run_pipeline
+from .pipeline import ingest, normalize, export
+from .transforms.chunking import chunk_dataset
+from .register_defaults import register_defaults
+from .catalog import load_catalog
+from .hf_export import push_jsonl
+from .pipeline_config import load_spec, run_spec
+from .registry import registry
+
+app = typer.Typer(help="Agentic datasets pipeline CLI")
+register_defaults()
+
+
+@app.command()
+def run(
+    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
+    output_path: Path = typer.Argument(..., help="Output JSONL file"),
+    max_records: Optional[int] = typer.Option(None, help="Limit number of records (debug)"),
+):
+    cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=max_records)
+    out = run_pipeline(cfg)
+    typer.echo(f"Wrote: {out}")
+
+
+@app.command()
+def validate(
+    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
+    max_records: Optional[int] = typer.Option(10, help="Validate N records (default: 10)"),
+):
+    # Reuse pipeline's initial steps to validate structure by attempting normalization only
+    cfg = PipelineConfig(input_path=input_path, output_path=Path("/dev/null"), max_records=max_records)
+    count = 0
+    for rec in normalize(ingest(cfg.input_path)):
+        count += 1
+        if max_records is not None and count >= max_records:
+            break
+    typer.echo(f"Validated {count} records successfully")
+
+
+@app.command()
+def chunk(
+    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
+    output_path: Path = typer.Argument(..., help="Output JSONL file"),
+    model_name: str = typer.Option("gpt-4o-mini", help="Model encoding name for tokenization"),
+    max_tokens: int = typer.Option(512, help="Max tokens per chunk"),
+    overlap: int = typer.Option(50, help="Token overlap between chunks"),
+):
+    cfg = PipelineConfig(input_path=input_path, output_path=output_path)
+    recs = normalize(ingest(cfg.input_path))
+    chunked = chunk_dataset(recs, model_name=model_name, max_tokens=max_tokens, overlap=overlap)
+    export(chunked, cfg.output_path)
+    typer.echo(f"Chunked output written to: {cfg.output_path}")
+
+
+@app.command()
+def run_config(
+    config_path: Path = typer.Argument(..., help="YAML pipeline config file"),
+):
+    spec = load_spec(config_path)
+    out = run_spec(spec)
+    typer.echo(f"Pipeline completed: {out}")
+
+
+@app.command()
+def transforms():
+    names = sorted(registry.list().keys())
+    for n in names:
+        typer.echo(n)
+
+
+@app.command("catalog:list")
+def catalog_list(catalog: str = typer.Argument("catalog.yaml", help="Path to catalog YAML")):
+    """List catalog entries."""
+    cat = load_catalog(Path(catalog))
+    for e in cat.entries:
+        typer.echo(f"{e.id}\t{e.name}\t{e.version}")
+
+
+@app.command("catalog:show")
+def catalog_show(entry_id: str, catalog: str = typer.Argument("catalog.yaml")):
+    """Show a catalog entry details."""
+    cat = load_catalog(Path(catalog))
+    e = cat.get(entry_id)
+    typer.echo(e.model_dump_json(indent=2))
+
+
+@app.command("hf:push")
+def hf_push(
+    entry_id: str,
+    repo_id: str,
+    data: str = typer.Argument(..., help="Path to JSONL to push"),
+    catalog: str = typer.Option("catalog.yaml", help="Path to catalog YAML"),
+    private: bool = typer.Option(False, help="Create private repo"),
+):
+    """Push a dataset JSONL file to Hugging Face Hub, with dataset card from catalog."""
+    from .catalog import make_dataset_card, load_catalog
+
+    cat = load_catalog(Path(catalog))
+    entry = cat.get(entry_id)
+    card = make_dataset_card(entry)
+    push_jsonl(repo_id=repo_id, path=Path(data), dataset_card=card, private=private)
+    typer.echo(f"Pushed {data} to hf://datasets/{repo_id}")
+
+if __name__ == "__main__":
+    app()
