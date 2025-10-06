@@ -28,7 +28,7 @@ requires-python = ">=3.9"
    "pytest>=7.4",
    "pytest-cov>=4.1",
    "ruff>=0.5",
-   "black>=24.4",
+   "black>=24.4,<25",
    "mypy>=1.10",
  ]
 
