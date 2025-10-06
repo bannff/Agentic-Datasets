@@ -17,18 +17,11 @@ To enable full functionality:
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Iterable, Iterator, Optional
 
 from ..schemas.messages import ConversationRecord, Message
-from ..agents import (
-    AgentConfig,
-    create_agent,
-    S2M_SYSTEM_PROMPT,
-    S2M_USER_TEMPLATE,
-    validate_provider_credentials,
-)
+from ..agents import validate_provider_credentials
 
 logger = logging.getLogger(__name__)
 
@@ -171,10 +164,7 @@ def _fallback_multiturn(rec: ConversationRecord) -> ConversationRecord:
     
     Adds a simple follow-up question and answer as a placeholder.
     """
-    original_q = rec.messages[0].content
-    original_a = rec.messages[1].content
-    
-    # Simple follow-up
+    # Simple follow-up (original messages are preserved in rec)
     followup_q = "Can you provide an example?"
     followup_a = "[Example would be provided here with actual agent implementation]"
     
