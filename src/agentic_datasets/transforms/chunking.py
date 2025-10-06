@@ -44,8 +44,14 @@ def chunk_conversation(
 
 
 def chunk_dataset(
-    recs: Iterable[ConversationRecord], *, model_name: str = "gpt-4o-mini", max_tokens: int = 512, overlap: int = 50
+    recs: Iterable[ConversationRecord],
+    *,
+    model_name: str = "gpt-4o-mini",
+    max_tokens: int = 512,
+    overlap: int = 50,
 ) -> Iterator[ConversationRecord]:
     for r in recs:
-        for c in chunk_conversation(r, model_name=model_name, max_tokens=max_tokens, overlap=overlap):
+        for c in chunk_conversation(
+            r, model_name=model_name, max_tokens=max_tokens, overlap=overlap
+        ):
             yield c

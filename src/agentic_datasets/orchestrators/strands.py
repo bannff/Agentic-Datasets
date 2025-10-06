@@ -6,6 +6,7 @@ import importlib
 
 from ..schemas.messages import ConversationRecord, Message, ToolCall
 
+
 def run_strands_pipeline(
     stages: list[dict[str, Any]],
     records: Iterable[ConversationRecord],

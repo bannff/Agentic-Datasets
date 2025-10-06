@@ -21,22 +21,34 @@ register_defaults()
 
 @app.command()
 def run(
-    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
+    input_path: Path = typer.Argument(
+        ..., help="Input JSONL file or directory of JSONL files"
+    ),
     output_path: Path = typer.Argument(..., help="Output JSONL file"),
-    max_records: Optional[int] = typer.Option(None, help="Limit number of records (debug)"),
+    max_records: Optional[int] = typer.Option(
+        None, help="Limit number of records (debug)"
+    ),
 ):
-    cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=max_records)
+    cfg = PipelineConfig(
+        input_path=input_path, output_path=output_path, max_records=max_records
+    )
     out = run_pipeline(cfg)
     typer.echo(f"Wrote: {out}")
 
 
 @app.command()
 def validate(
-    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
-    max_records: Optional[int] = typer.Option(10, help="Validate N records (default: 10)"),
+    input_path: Path = typer.Argument(
+        ..., help="Input JSONL file or directory of JSONL files"
+    ),
+    max_records: Optional[int] = typer.Option(
+        10, help="Validate N records (default: 10)"
+    ),
 ):
     # Reuse pipeline's initial steps to validate structure by attempting normalization only
-    cfg = PipelineConfig(input_path=input_path, output_path=Path("/dev/null"), max_records=max_records)
+    cfg = PipelineConfig(
+        input_path=input_path, output_path=Path("/dev/null"), max_records=max_records
+    )
     count = 0
     for rec in normalize(ingest(cfg.input_path)):
         count += 1
@@ -47,15 +59,21 @@ def validate(
 
 @app.command()
 def chunk(
-    input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
+    input_path: Path = typer.Argument(
+        ..., help="Input JSONL file or directory of JSONL files"
+    ),
     output_path: Path = typer.Argument(..., help="Output JSONL file"),
-    model_name: str = typer.Option("gpt-4o-mini", help="Model encoding name for tokenization"),
+    model_name: str = typer.Option(
+        "gpt-4o-mini", help="Model encoding name for tokenization"
+    ),
     max_tokens: int = typer.Option(512, help="Max tokens per chunk"),
     overlap: int = typer.Option(50, help="Token overlap between chunks"),
 ):
     cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=None)
     recs = normalize(ingest(cfg.input_path))
-    chunked = chunk_dataset(recs, model_name=model_name, max_tokens=max_tokens, overlap=overlap)
+    chunked = chunk_dataset(
+        recs, model_name=model_name, max_tokens=max_tokens, overlap=overlap
+    )
     export(chunked, cfg.output_path)
     typer.echo(f"Chunked output written to: {cfg.output_path}")
 
@@ -78,7 +96,9 @@ def transforms():
 
 
 @app.command("catalog:list")
-def catalog_list(catalog: str = typer.Argument("catalog.yaml", help="Path to catalog YAML")):
+def catalog_list(
+    catalog: str = typer.Argument("catalog.yaml", help="Path to catalog YAML"),
+):
     """List catalog entries."""
     cat = load_catalog(Path(catalog))
     for e in cat.entries:
@@ -109,6 +129,7 @@ def hf_push(
     card = make_dataset_card(entry)
     push_jsonl(repo_id=repo_id, path=Path(data), dataset_card=card, private=private)
     typer.echo(f"Pushed {data} to hf://datasets/{repo_id}")
+
 
 if __name__ == "__main__":
     app()

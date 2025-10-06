@@ -18,6 +18,11 @@ def s2m(records: Iterable[ConversationRecord]) -> Iterator[ConversationRecord]:
         # If single message, synthesize a minimal two-turn structure (placeholder)
         msg = rec.messages[0]
         if msg.role == "user":
-            yield ConversationRecord(messages=[msg, Message(role="assistant", content="...")], metadata=rec.metadata, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=[msg, Message(role="assistant", content="...")],
+                metadata=rec.metadata,
+                source=rec.source,
+                id=rec.id,
+            )
         else:
             yield rec

@@ -62,6 +62,8 @@ class ConversationRecord(BaseModel):
         last_role: Optional[Role] = None
         for m in v:
             if last_role == m.role and m.role in ("user", "assistant"):
-                raise ValueError("Consecutive messages with same conversational role are not allowed")
+                raise ValueError(
+                    "Consecutive messages with same conversational role are not allowed"
+                )
             last_role = m.role
         return v

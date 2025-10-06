@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from agentic_datasets.pipeline_config import PipelineSpec, run_spec
+from agentic_datasets.pipeline_config import PipelineSpec, run_spec, StageConfig
 from agentic_datasets.register_defaults import register_defaults
 
 
@@ -16,9 +16,7 @@ def test_run_spec_with_chunker(tmp_path: Path) -> None:
             [
                 '{"messages":[{"role":"user","content":"Hello"},{"role":"assistant","content":"Hi"}]}'
             ]
-            + [
-                '{"messages":[{"role":"user","content":"%s"}]}' % ("hello " * 300)
-            ]
+            + ['{"messages":[{"role":"user","content":"%s"}]}' % ("hello " * 300)]
         ),
         encoding="utf-8",
     )
@@ -29,7 +27,12 @@ def test_run_spec_with_chunker(tmp_path: Path) -> None:
         input=input_path,
         output=out_path,
         max_records=None,
-        stages=[{"name": "chunk", "params": {"model_name": "gpt-4o-mini", "max_tokens": 200, "overlap": 20}}],
+        stages=[
+            StageConfig(
+                name="chunk",
+                params={"model_name": "gpt-4o-mini", "max_tokens": 200, "overlap": 20},
+            )
+        ],
     )
     out = run_spec(spec)
     assert out == out_path

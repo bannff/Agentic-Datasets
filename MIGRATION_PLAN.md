@@ -121,13 +121,58 @@ Focus: dataset pipeline + catalog. Training/chat moved to `examples/` or separat
 
 ---
 
-## Phased Migration Plan
+## What Works NOW (Cloud-First, Automated)
 
-Phase 3: Agentic Generation (S2M → APIGenMT → ReviewInstruct)
- - Status: Pure-function adapters scaffolded and registered (s2m, apigenmt, reviewinstruct)
- - Status: Tool-call schema added (assistant tool_calls, tool messages)
- - Status: YAML pipeline + tests working (in-process + strands flag routes to orchestrator scaffold)
- - Next: Wire actual Strands Graph + strands-tools to execute tool_calls and emit tool messages
+### ✅ Working Components
+1. **CI/CD Pipeline**: All 9 GitHub Actions workflows functional (ci, docker, smoke, devcontainer, run_pipeline, nightly, publish_hf, publish_hf_on_tag, release)
+2. **Basic Pipeline**: Ingest → Normalize → Validate → Export (JSONL)
+3. **Chunking**: Token-aware splitting with tiktoken (gpt-4o-mini encoding)
+4. **Catalog System**: catalog.yaml + CLI commands (list, show)
+5. **HF Publishing**: Push to Hugging Face Hub with dataset cards
+6. **Docker**: Builds on push, published to GHCR
+7. **Schema Validation**: Pydantic-based ConversationRecord with tool_calls support
+8. **Registry Pattern**: Transform registration and YAML-driven execution
+
+### ⚠️ Stubbed/Non-Functional
+1. **S2M** (Single→Multi-turn): Adds placeholder assistant message, NO real transformation
+2. **APIGenMT** (Add tool calls): Sets `agentic=true` metadata flag, NO actual tool call injection
+3. **ReviewInstruct** (Refine): Sets `reviewed=true` metadata flag, NO actual refinement
+4. **Strands SDK**: Referenced but NOT available (repo 404), falls back to in-process registry
+5. **LLM Integration**: NO model provider configured (OpenAI/Anthropic/etc)
+
+### 🚫 Cannot Do (Yet)
+- Convert single-turn dataset to actual multi-turn conversations (S2M stub only)
+- Inject real tool calls into conversations (APIGenMT stub only)
+- Refine conversations for quality (ReviewInstruct stub only)
+- Use Strands SDK graph orchestration (SDK unavailable)
+- Call LLMs for transformations (no provider configured)
+
+### ✅ CAN Do (Proven)
+- Ingest JSONL, validate schema, export JSONL
+- Chunk long conversations with token limits
+- Publish to HF Hub with catalog metadata
+- Run pipelines in GitHub Actions (cloud-only, no local deps)
+- Execute transform chains via YAML config
+- Build/push Docker images automatically
+
+---
+
+## Critical Gaps Preventing End-to-End Agentic Pipeline
+
+1. **No Strands SDK**: `strands-ai/sdk-python` returns 404 - need alternative or wait for SDK
+2. **No LLM Provider**: No OpenAI/Anthropic/etc API calls implemented
+3. **Stub Stages**: S2M/APIGenMT/ReviewInstruct are metadata-only stubs
+4. **No Real Transformation Logic**: Cannot actually convert single→multi-turn or inject tool calls
+
+---
+ - Status: SCAFFOLDED - Pure-function adapters registered (s2m, apigenmt, reviewinstruct)
+ - Status: Tool-call schema IMPLEMENTED (assistant tool_calls, tool messages)
+ - Status: YAML pipeline + tests WORKING (in-process + strands flag routes to orchestrator)
+ - Status: Strands orchestrator FUNCTIONAL (uses in-process registry, attempts tool execution)
+ - BLOCKER: No LLM integration - stages are pass-through stubs (S2M just adds assistant message, APIGenMT/ReviewInstruct set metadata flags)
+ - BLOCKER: Strands SDK not available (sdk-python repo returns 404) - using in-process execution
+ - BLOCKER: No model provider configured (OpenAI/Anthropic/etc) for actual transformations
+ - Next: Implement actual LLM calls in S2M/APIGenMT/ReviewInstruct OR integrate real Strands SDK when available
 
 Phase 0: Repo Hygiene
 - Add LICENSE, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT, .gitignore
