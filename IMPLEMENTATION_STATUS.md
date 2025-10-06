@@ -120,39 +120,100 @@
 
 ### 🔴 What's Next (Implementation Tasks)
 
-1. **Install Strands SDK** (5 minutes)
+---
+
+## ⭐ Model Provider Recommendation
+
+### Cost/Quality Comparison
+
+| Provider | Model | Input ($/MTok) | Output ($/MTok) | Notes |
+|----------|-------|----------------|-----------------|-------|
+| **Anthropic API** | Claude 3.5 Haiku | $0.80 | $4.00 | ⭐ **RECOMMENDED** - Best balance |
+| **AWS Bedrock** | Claude 3.5 Haiku | ~$1.00 | ~$5.00 | Slightly higher than direct API |
+| **Together AI** | Llama 3.3 70B | $0.88 | $0.88 | Good quality, competitive |
+| **Together AI** | Llama 4 Scout | $0.18 | $0.59 | Very cheap, smaller model |
+| **Mistral API** | Mistral Small 3 | $0.80 | $0.80 | Good pricing, mid-range |
+| **Ollama** | Llama 3.3 70B | FREE | FREE | Local (requires GPU) |
+
+### Our Recommendation: **Claude 3.5 Haiku via Anthropic API**
+
+**Why?**
+- **Best cost/quality**: $0.80 input / $4.00 output per million tokens
+- **Fastest**: Critical for batch processing
+- **High quality**: Excellent JSON output, function calling, reasoning
+- **200K context**: Can handle large conversations
+- **8192 token output**: Sufficient for multi-turn generation
+
+**Cost Estimate (10K Q&A pairs → multi-turn):**
+- Average: 500 tokens input → 2000 tokens output per pair
+- Total: 5M input + 20M output tokens
+- **Estimated: $84 total** ($4 input + $80 output)
+
+**Alternative for Dev/Testing:**
+- Use **Ollama + Llama 3.3 70B** locally (FREE)
+- Switch to **Claude 3.5 Haiku** for production
+
+---
+
+## Installation Strategy
+
+### Production (Docker/CI) - ✅ NO LOCAL INSTALL NEEDED
+- Docker automatically installs all dependencies via `pip install -e .`
+- Strands SDK included in `pyproject.toml` core deps (lines 25-26):
+  ```
+  strands-agents>=1.0.0
+  strands-agents-tools>=0.2.0
+  ```
+- Provider installed via optional groups when needed
+
+### Local Development/Testing (Optional)
+Only needed if you want to test interactively on your Mac:
+
+```bash
+# Install with Anthropic API support (recommended):
+pip install -e ".[anthropic]"
+
+# Or for other providers:
+pip install -e ".[bedrock]"         # AWS Bedrock
+pip install -e ".[all-providers]"   # All providers
+```
+
+---
+
+## Implementation Steps
+
+1. **Configure Model Provider** (10-30 minutes)
+   
+   **Option A - Anthropic API (RECOMMENDED):**
    ```bash
-   pip install strands-agents strands-agents-tools
+   # Get key: https://console.anthropic.com/
+   export ANTHROPIC_API_KEY="your-key"
+   
+   # Test locally (optional):
+   pip install -e ".[anthropic]"
+   ```
+   
+   **Option B - Bedrock (Enterprise):**
+   ```bash
+   # Configure AWS credentials
+   aws configure  # OR export AWS_PROFILE=your-profile
+   
+   # Enable Claude 3.5 Haiku in Bedrock console
+   # https://console.aws.amazon.com/bedrock/home → Model access
+   
+   # Test locally (optional):
+   pip install -e ".[bedrock]"
+   ```
+   
+   **Option C - Ollama (Local Dev):**
+   ```bash
+   # Install Ollama: https://ollama.com/
+   ollama pull llama3.3
+   
+   # No API key needed, runs locally
    ```
 
-2. **Configure Model Provider** (10-30 minutes)
-   - **Option A - Bedrock (Recommended for Enterprise):**
-     ```bash
-     # Configure AWS credentials
-     aws configure  # OR export AWS_PROFILE=your-profile
-     
-     # Enable Claude 4 in Bedrock console
-     # https://console.aws.amazon.com/bedrock/home → Model access
-     
-     # Install provider
-     pip install boto3
-     ```
-   
-   - **Option B - Anthropic (Direct API):**
-     ```bash
-     # Get key: https://console.anthropic.com/
-     export ANTHROPIC_API_KEY="your-key"
-     pip install anthropic
-     ```
-   
-   - **Option C - OpenAI:**
-     ```bash
-     # Get key: https://platform.openai.com/api-keys
-     export OPENAI_API_KEY="your-key"
-     pip install openai
-     ```
-
-3. **Uncomment S2M Implementation** (30 minutes)
+2. **Uncomment S2M Implementation** (30 minutes)
    - In `src/agentic_datasets/stages/s2m.py`:
      - Uncomment the `from strands.agents import Agent` imports
      - Uncomment `create_agent()` call
@@ -160,19 +221,19 @@
      - Update `s2m()` to use async agent calls
    - Test with synthetic cybersecurity Q&A
 
-4. **Implement APIGenMT Stage** (3-5 days)
+3. **Implement APIGenMT Stage** (3-5 days)
    - Parse catalog.yaml to Strands @tool functions
    - Create agent with tool registration
    - Implement 3-stage verification (format, execution, semantic)
    - Add tests with mock tools
 
-5. **Implement ReviewInstruct Stage** (5-7 days)
+4. **Implement ReviewInstruct Stage** (5-7 days)
    - Create 5 agents (Candidate, 4 Reviewers, Chairman)
    - Build multi-agent graph with Strands
    - Implement iterative refinement loop
    - Add observability metrics
 
-6. **End-to-End Testing** (2-3 days)
+5. **End-to-End Testing** (2-3 days)
    - Set up GitHub LFS for test datasets
    - Create private output directory
    - Run full pipeline on 100-entry cybersecurity test set
