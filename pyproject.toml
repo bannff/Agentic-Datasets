@@ -20,21 +20,40 @@ requires-python = ">=3.9"
    "huggingface_hub>=0.24.0",
    "tiktoken>=0.7",
    "datasketch>=1.6",
-  "langchain-text-splitters>=0.3.0",
+   "langchain-text-splitters>=0.3.0",
+   # Strands SDK for agentic orchestration
+   "strands-agents>=1.0.0",
+   "strands-agents-tools>=0.2.0",
  ]
 
  [project.optional-dependencies]
  dev = [
    "pytest>=7.4",
+   "pytest-asyncio>=0.21",  # For async tests
    "pytest-cov>=4.1",
    "ruff>=0.5",
    "black>=24.4,<25",
    "mypy>=1.10",
  ]
 
- orchestration = [
-   "strands",               # Strands SDK (sdk-python)
-   "strands-agents-tools",  # Community tools package
+ # Model providers - install the one(s) you plan to use
+ bedrock = [
+   "boto3>=1.26.0",         # AWS Bedrock (Claude 4, Titan, etc)
+ ]
+ 
+ anthropic = [
+   "anthropic>=0.28.0",     # Direct Anthropic API (Claude 3/4)
+ ]
+ 
+ openai = [
+   "openai>=1.0.0",         # OpenAI API (GPT-4, GPT-3.5)
+ ]
+ 
+ # Install all model providers
+ all-providers = [
+   "boto3>=1.26.0",
+   "anthropic>=0.28.0",
+   "openai>=1.0.0",
  ]
 
  [project.scripts]
