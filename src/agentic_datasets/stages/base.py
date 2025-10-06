@@ -14,5 +14,4 @@ class StageConfig(BaseModel):
 class StageFunc(Protocol):
     def __call__(
         self, records: Iterable[ConversationRecord], **kwargs
-    ) -> Iterator[ConversationRecord]:
-        ...
+    ) -> Iterator[ConversationRecord]: ...

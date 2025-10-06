@@ -13,9 +13,7 @@ def test_run_spec_with_chunker(tmp_path: Path) -> None:
     input_path = tmp_path / "in.jsonl"
     input_path.write_text(
         "\n".join(
-            [
-                '{"messages":[{"role":"user","content":"Hello"},{"role":"assistant","content":"Hi"}]}'
-            ]
+            ['{"messages":[{"role":"user","content":"Hello"},{"role":"assistant","content":"Hi"}]}']
             + ['{"messages":[{"role":"user","content":"%s"}]}' % ("hello " * 300)]
         ),
         encoding="utf-8",

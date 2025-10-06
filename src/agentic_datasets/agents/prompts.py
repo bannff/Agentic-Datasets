@@ -305,10 +305,10 @@ Provide your synthesis and decision now:
 
 def format_conversation_for_review(messages: list) -> str:
     """Format conversation messages for review prompts.
-    
+
     Args:
         messages: List of Message objects
-    
+
     Returns:
         Formatted conversation text
     """
@@ -316,27 +316,26 @@ def format_conversation_for_review(messages: list) -> str:
     for msg in messages:
         role = msg.role.upper()
         content = msg.content
-        
+
         if hasattr(msg, "tool_calls") and msg.tool_calls:
             tool_info = ", ".join(
-                f"{tc.function.name}({tc.function.arguments})" 
-                for tc in msg.tool_calls
+                f"{tc.function.name}({tc.function.arguments})" for tc in msg.tool_calls
             )
             lines.append(f"{role}: {content}\n  [Tool Calls: {tool_info}]")
         elif msg.role == "tool":
             lines.append(f"TOOL ({msg.name}): {content}")
         else:
             lines.append(f"{role}: {content}")
-    
+
     return "\n\n".join(lines)
 
 
 def format_tools_catalog(tools: list) -> str:
     """Format tool definitions for prompts.
-    
+
     Args:
         tools: List of tool definitions from catalog
-    
+
     Returns:
         Formatted tool catalog text
     """
@@ -345,10 +344,10 @@ def format_tools_catalog(tools: list) -> str:
         name = tool.get("name", "unknown")
         desc = tool.get("description", "")
         params = tool.get("parameters", {})
-        
+
         lines.append(f"**{name}**")
         lines.append(f"  Description: {desc}")
-        
+
         if params:
             lines.append("  Parameters:")
             for param_name, param_info in params.items():
@@ -356,7 +355,7 @@ def format_tools_catalog(tools: list) -> str:
                 param_type = param_info.get("type", "string")
                 param_desc = param_info.get("description", "")
                 lines.append(f"    - {param_name} ({param_type}){required}: {param_desc}")
-        
+
         lines.append("")  # Blank line between tools
-    
+
     return "\n".join(lines)

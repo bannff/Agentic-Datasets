@@ -44,8 +44,7 @@ def run_spec(spec: PipelineSpec) -> Path:
     stream: Iterator[ConversationRecord] = normalize(records)
     # Normalize stages to StageConfig for static typing downstream
     stages: List[StageConfig] = [
-        s if isinstance(s, StageConfig) else StageConfig.model_validate(s)
-        for s in spec.stages
+        s if isinstance(s, StageConfig) else StageConfig.model_validate(s) for s in spec.stages
     ]
     # Orchestrate stages
     if spec.orchestrator == "strands":

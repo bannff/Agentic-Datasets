@@ -30,9 +30,9 @@ jobs:
       - name: Run example pipeline (local orchestrator)
         run: |
           docker run --rm -v ${{ github.workspace }}:/app agentic-datasets:test \
-            run_config examples/pipeline.example.yaml
+            run-config examples/pipeline.example.yaml
 
       - name: Run agentic pipeline (strands orchestrator)
         run: |
           docker run --rm -e BYPASS_TOOL_CONSENT=true -v ${{ github.workspace }}:/app agentic-datasets:test \
-            run_config examples/pipeline.agentic.yaml
+            run-config examples/pipeline.agentic.yaml

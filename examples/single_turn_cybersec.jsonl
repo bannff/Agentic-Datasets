@@ -1,0 +1,8 @@
+# Single-Turn Cybersecurity Dataset (Synthetic)
+# Each record is a single Q&A pair that will be converted to multi-turn, then agentic
+
+{"messages":[{"role":"user","content":"What is SQL injection?"}],"id":"cyber-001","source":"synthetic"}
+{"messages":[{"role":"user","content":"How do I secure my AWS S3 bucket?"}],"id":"cyber-002","source":"synthetic"}
+{"messages":[{"role":"user","content":"Explain XSS attacks"}],"id":"cyber-003","source":"synthetic"}
+{"messages":[{"role":"user","content":"What are common authentication vulnerabilities?"}],"id":"cyber-004","source":"synthetic"}
+{"messages":[{"role":"user","content":"How does HTTPS encryption work?"}],"id":"cyber-005","source":"synthetic"}
