@@ -12,7 +12,28 @@ When you click "Codespaces" from your GitHub repository, you'll see a browser-ba
 
 The **File Explorer** is the primary way to view your repository files:
 
-1. **Look at the left sidebar** - You should see several icons vertically aligned
+```
+┌─────────────────────────────────────────┐
+│ [≡] VS Code - Codespaces               │  ← Menu bar
+├───┬─────────────────────────────────────┤
+│ 📄│ EXPLORER                            │
+│   │ ▼ DATASETS                          │  ← Your files appear here
+│ 🔍│   📄 README.md                      │
+│   │   📄 CODESPACES.md                  │
+│ ⎇ │   📁 src/                           │
+│   │   📁 tests/                         │
+│ ▶ │   📁 .github/                       │
+│   │   ...                               │
+│ 🐞│                                     │
+│   │                                     │
+│ ⚙ │   [Editor Area]                     │
+│   │                                     │
+└───┴─────────────────────────────────────┘
+    ↑
+    Sidebar with icons
+```
+
+1. **Look at the left sidebar** - You should see several icons vertically aligned (📄 🔍 ⎇ 🐞 ⚙)
 2. **Click the top icon** (looks like two overlapping documents 📄) - This is the File Explorer
 3. **Your repository files will appear** in a tree view on the left side
 
