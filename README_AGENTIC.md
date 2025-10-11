@@ -24,6 +24,12 @@ This repo now includes a modular, config-driven pipeline for building agentic, m
 - Run sample YAML pipeline
   agentic-datasets run-config examples/pipeline.example.yaml
 
+- Run with local Ollama (Qwen3 8B)
+  1) Install extras and Ollama client: pip install -e .[dev,ollama]
+  2) Install and start Ollama: https://ollama.com/download
+  3) Pull model: ollama pull qwen3:8b
+  4) Run: agentic-datasets run-config examples/pipeline.ollama.yaml
+
 - List catalog entries
   agentic-datasets catalog:list catalog.yaml
 
@@ -140,6 +146,7 @@ https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-pr
 
 - ollama:
 https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/ollama/
+  Notes: Requires local Ollama daemon (default http://localhost:11434). Use `ollama pull qwen3:8b`.
 
 - LiteLLM:
 https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/litellm/

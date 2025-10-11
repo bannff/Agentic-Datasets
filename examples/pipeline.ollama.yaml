@@ -1,0 +1,16 @@
+input: examples/sample.jsonl
+output: examples/out.ollama.jsonl
+orchestrator: strands
+stages:
+  - name: agentinstruct
+    params:
+      k_variants: 2
+  - name: s2m
+    params:
+      # S2M now supports local Ollama path. Ensure you have Ollama running and the model pulled.
+      config:
+        provider: ollama
+        model_name: qwen3:8b
+        temperature: 0.4
+  - name: apigenmt
+  - name: reviewinstruct

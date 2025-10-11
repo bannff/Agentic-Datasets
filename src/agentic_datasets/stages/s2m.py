@@ -31,7 +31,7 @@ class S2MConfig:
 
     def __init__(
         self,
-        provider: str = "bedrock",
+        provider: str = "ollama",
         model_name: Optional[str] = None,
         temperature: float = 0.7,
         min_turns: int = 3,
@@ -41,7 +41,7 @@ class S2MConfig:
         """Initialize S2M configuration.
 
         Args:
-            provider: Model provider (bedrock, anthropic, openai)
+            provider: Model provider (ollama, bedrock, anthropic, openai)
             model_name: Specific model (uses provider default if None)
             temperature: Generation temperature (0.0-1.0)
             min_turns: Minimum conversation turns to generate
@@ -49,7 +49,7 @@ class S2MConfig:
             enabled: Whether S2M transformation is enabled
         """
         self.provider = provider
-        self.model_name = model_name
+        self.model_name = model_name or ("qwen3:8b" if provider == "ollama" else None)
         self.temperature = temperature
         self.min_turns = min_turns
         self.max_turns = max_turns
@@ -87,34 +87,17 @@ def s2m(
         yield from records
         return
 
-    # Check if Strands SDK is available
-    try:
-        # NOTE: Uncomment when strands-agents is installed
-        # from strands.agents import Agent
-        # agent = create_agent(
-        #     AgentConfig(
-        #         provider=config.provider,
-        #         model_name=config.model_name,
-        #         temperature=config.temperature,
-        #         system_prompt=S2M_SYSTEM_PROMPT,
-        #     )
-        # )
-        # has_agent = agent is not None
-        has_agent = False  # Placeholder until SDK installed
-    except ImportError:
-        logger.warning(
-            "Strands SDK not available. Install with: "
-            "pip install strands-agents strands-agents-tools"
-        )
-        has_agent = False
+    # Try Ollama local path first when requested; otherwise, skip to fallback until Strands is wired
+    use_ollama = config.provider.lower() == "ollama"
+    ollama_client = None
+    if use_ollama:
+        try:
+            from ollama import Client  # type: ignore
 
-    # Validate provider credentials if agent available
-    if has_agent and not validate_provider_credentials(config.provider):
-        logger.error(
-            f"Provider '{config.provider}' credentials not configured. "
-            f"See setup instructions in agents.base module."
-        )
-        has_agent = False
+            ollama_client = Client()
+        except Exception as e:
+            logger.warning(f"Ollama client unavailable: {e}. Falling back.")
+            ollama_client = None
 
     for rec in records:
         # If already multi-turn, yield as-is
@@ -129,12 +112,53 @@ def s2m(
             and rec.messages[0].role == "user"
             and rec.messages[1].role == "assistant"
         ):
-            if has_agent:
-                # TODO: Implement async agent call
-                # conversation = await _generate_multiturn(rec, agent, config)
-                # yield conversation
-                logger.warning(f"Agent available but async implementation pending for {rec.id}")
-                yield _fallback_multiturn(rec)
+            if ollama_client is not None and config.model_name:
+                # Attempt a minimal 2 extra turns generation via Ollama chat
+                try:
+                    user_q = rec.messages[0].content
+                    assistant_a = rec.messages[1].content
+                    prompt = (
+                        "You are an expert conversational tutor. Given an initial user question and "
+                        "assistant answer, propose ONE natural follow-up user question that deepens understanding.\n\n"
+                        f"Q: {user_q}\nA: {assistant_a}\n\nReturn only the follow-up question."
+                    )
+                    q_resp = ollama_client.generate(
+                        model=config.model_name,
+                        prompt=prompt,
+                        options={"temperature": max(0.0, min(1.0, config.temperature))},
+                    )
+                    followup_q = (q_resp.get("response") or "Could you give an example?").strip()
+
+                    a_resp = ollama_client.generate(
+                        model=config.model_name,
+                        prompt=f"User asked: {followup_q}\nProvide a concise, accurate answer.",
+                        options={"temperature": max(0.0, min(1.0, config.temperature))},
+                    )
+                    followup_a = (a_resp.get("response") or "[Answer]").strip()
+
+                    out = ConversationRecord(
+                        messages=[
+                            rec.messages[0],
+                            rec.messages[1],
+                            Message(role="user", content=followup_q),
+                            Message(role="assistant", content=followup_a),
+                        ],
+                        metadata={
+                            **(rec.metadata or {}),
+                            "stage": "s2m",
+                            "original_turns": 2,
+                            "generated_turns": 4,
+                            "provider": "ollama",
+                            "model": config.model_name,
+                        },
+                        source=rec.source,
+                        id=rec.id,
+                    )
+                    yield out
+                    continue
+                except Exception as e:
+                    logger.warning(f"Ollama generation failed: {e}. Falling back for {rec.id}")
+                    yield _fallback_multiturn(rec)
             else:
                 # Fallback: minimal placeholder
                 logger.debug(f"No agent available, using fallback for {rec.id}")

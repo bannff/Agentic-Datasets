@@ -56,6 +56,11 @@ requires-python = ">=3.9"
    "openai>=1.0.0",
  ]
 
+# Local provider: Ollama
+ollama = [
+  "ollama>=0.1.0",
+]
+
  [project.scripts]
  agentic-datasets = "agentic_datasets.cli:app"
 
