@@ -7,6 +7,8 @@
 
 Config-driven pipelines for building agentic, multi-turn datasets with chunking, validation, optional tool-call execution, and Hugging Face publishing. Includes CLI, tests, CI, Docker image, and Codespaces devcontainer.
 
+> **👋 New to Codespaces?** If you just opened this project in Codespaces and don't see your files, check out [CODESPACES.md](CODESPACES.md) for help!
+
 ## Quickstart
 
 1. Create and activate a virtual environment
@@ -45,6 +47,8 @@ Auto-publish on tag (optional):
 ## Codespaces
 
 Devcontainer is included (.devcontainer/devcontainer.json). Open in Codespaces to get a ready-to-run environment.
+
+**New to Codespaces?** See [CODESPACES.md](CODESPACES.md) for a complete guide on viewing files, navigating the IDE, and troubleshooting common issues.
 
 ## Notes
 ## Cloud-first: run pipelines in Actions
