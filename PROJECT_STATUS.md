@@ -97,6 +97,22 @@ tests/test_tool_calls_schema.py
 - ReviewInstruct (refine quality): scaffold only
 - Strands orchestration: placeholder implementation
 
+#### 1.1 AgentInstruct (NEW – complementary stage)
+Purpose: Expand single-turn seeds into k diverse instruction variants prior to S2M.
+
+Placement in flow:
+- normalize → validate → AgentInstruct → S2M → APIGenMT → ReviewInstruct → validate → export
+
+Scope (initial):
+- k_variants (2–3), temperature, max_tokens, provider-agnostic (local/cloud later)
+- Output metadata: origin_id, variant_id, variant_prompt, dedupe_score
+- Post-process: semantic dedupe + lightweight safety filter; keep top-N diverse variants
+
+Next actions:
+- Add `stages/agentinstruct.py` with config + stub generator (no LLM call yet)
+- Register in `register_defaults.py` and example YAML
+- Unit tests: fan-out, metadata, dedupe
+
 **What exists:**
 - Stage interfaces defined
 - Registry pattern working
@@ -154,6 +170,7 @@ tests/test_tool_calls_schema.py
 1. Implement S2M logic (e.g., call GPT-4 to convert single→multi-turn)
 2. Implement APIGenMT (inject tool_calls into conversations)
 3. Implement ReviewInstruct (refine conversations)
+4. Insert AgentInstruct before S2M to expand instruction diversity
 4. Wire Strands orchestration with actual agents
 5. Add example configs pointing to real datasets
 

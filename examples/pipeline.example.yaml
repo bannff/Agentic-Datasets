@@ -3,6 +3,9 @@ input: ./examples/sample.jsonl
 output: ./examples/out.chunked.jsonl
 max_records: 100
 stages:
+  - name: agentinstruct
+    params:
+      k_variants: 2
   - name: chunk
     params:
       model_name: gpt-4o-mini

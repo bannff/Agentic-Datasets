@@ -2,6 +2,9 @@ input: examples/sample.jsonl
 output: examples/out.agentic.jsonl
 orchestrator: strands
 stages:
+  - name: agentinstruct
+    params:
+      k_variants: 2
   - name: s2m
   - name: apigenmt
   - name: reviewinstruct
