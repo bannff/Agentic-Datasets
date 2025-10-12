@@ -60,6 +60,17 @@ Steps (macOS or Linux host):
 
 The workflow verifies http://localhost:11434, installs `agentic-datasets` with `[ollama]` extra, runs the pipeline, and uploads `out*.jsonl` files as artifacts. No OLLAMA_HOST is needed beyond localhost.
 
+Labels and preflight
+- Label your runner with `ollama` so only machines with Ollama pick up the job (`runs-on: [self-hosted, ollama]`).
+- Optional preflight on the runner:
+  - scripts/runner_preflight_ollama.sh (defaults to qwen3:8b)
+  - Example:
+    - `bash scripts/runner_preflight_ollama.sh`
+
+Hosted smoke checks
+- For fast PR feedback without models, use `.github/workflows/smoke_hosted.yml`.
+  - Runs lint, typecheck, tests, and a deterministic example pipeline on regular hosted runners.
+
 ## Strands-SDK Docs:
 
 - Quick Start:
