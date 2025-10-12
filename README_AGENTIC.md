@@ -40,6 +40,12 @@ Notes
 - Set HF token: huggingface-cli login
 - CI runs lint/type-check/tests on PRs; release workflow publishes to PyPI on tags (requires PYPI_API_TOKEN secret)
 
+## APIGenMT (Tool-call injection)
+
+- APIGenMT uses a Strands-first path similar to S2M. It formats the current conversation and a tools catalog via prompts in `src/agentic_datasets/agents/prompts.py`, calls a Strands Agent backed by Ollama, then parses returned JSON into Message/ToolCall schema.
+- If Strands or the model isn't available, it falls back gracefully by tagging metadata and passing messages through unchanged.
+- Provide a tools catalog via the stage config (`tools: [...]`) to guide which functions can be injected.
+
 ## Self-hosted runner with Ollama (CI)
 
 If you need model-backed stages (e.g., S2M with Ollama) in CI, the simplest approach is a self-hosted runner with Ollama installed.

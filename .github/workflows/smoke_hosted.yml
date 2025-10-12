@@ -1,5 +1,4 @@
 name: Smoke (Hosted)
-
 on:
   pull_request:
   push:
@@ -30,7 +29,6 @@ jobs:
           python -m ruff check --quiet || true
       - name: Typecheck (mypy)
         run: |
-          python -m mypy --version || true
           python -m mypy || true
       - name: Tests
         run: |
