@@ -7,10 +7,17 @@ on:
         description: Path to pipeline YAML
         required: false
         default: examples/pipeline.ollama.yaml
+      model:
+        description: Ollama model to use (must be pre-pulled on runner)
+        required: false
+        default: qwen3:8b
 
 jobs:
   run-pipeline:
     runs-on: [self-hosted, ollama]
+    concurrency:
+      group: self-hosted-ollama-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,6 +26,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies (ollama extra)
         run: |
@@ -30,11 +45,11 @@ jobs:
           # Check basic health/version endpoint without requiring jq
           curl -fsS http://localhost:11434/api/version || (echo "Ollama not reachable on localhost:11434" && exit 1)
 
-      - name: Check model availability (qwen3:8b)
+      - name: Preflight model
+        env:
+          OLLAMA_HOST: http://localhost:11434
         run: |
-          # Ensure the model is present on the runner; fail with actionable message if missing
-          curl -fsS http://localhost:11434/api/tags | grep -q '"model":"qwen3:8b"' \
-            || { echo "Model qwen3:8b not present on the runner. Pre-pull it: 'ollama pull qwen3:8b'"; exit 1; }
+          bash scripts/runner_preflight_ollama.sh "${{ github.event.inputs.model }}"
 
       - name: Run pipeline
         env:
@@ -45,7 +60,7 @@ jobs:
       - name: Upload outputs
         uses: actions/upload-artifact@v4
         with:
-          name: pipeline-outputs
+          name: pipeline-outputs-${{ github.run_number }}
           path: |
             examples/out*.jsonl
             **/out*.jsonl
