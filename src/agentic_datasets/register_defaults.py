@@ -9,8 +9,15 @@ from .stages.reviewinstruct import reviewinstruct
 
 
 def register_defaults() -> None:
-    registry.register("chunk", chunk_dataset)
-    registry.register("agentinstruct", agentinstruct)
-    registry.register("s2m", s2m)
-    registry.register("apigenmt", apigenmt)
-    registry.register("reviewinstruct", reviewinstruct)
+    def _safe_register(name: str, fn) -> None:
+        try:
+            registry.register(name, fn)
+        except ValueError:
+            # Already registered; make this idempotent
+            pass
+
+    _safe_register("chunk", chunk_dataset)
+    _safe_register("agentinstruct", agentinstruct)
+    _safe_register("s2m", s2m)
+    _safe_register("apigenmt", apigenmt)
+    _safe_register("reviewinstruct", reviewinstruct)

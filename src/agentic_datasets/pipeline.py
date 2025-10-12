@@ -41,7 +41,8 @@ def export(records: Iterable[ConversationRecord], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as f:
         for rec in records:
-            f.write(json.dumps(rec.model_dump(), ensure_ascii=False) + "\n")
+            # Drop None fields to avoid noisy nulls (e.g., tool_call_id/tool_output when unused)
+            f.write(json.dumps(rec.model_dump(exclude_none=True), ensure_ascii=False) + "\n")
 
 
 def run_pipeline(cfg: PipelineConfig) -> Path:

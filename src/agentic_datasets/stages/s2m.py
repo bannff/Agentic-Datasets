@@ -18,6 +18,7 @@ To enable full functionality:
 from __future__ import annotations
 
 import logging
+import os
 from typing import Iterable, Iterator, Optional
 
 from ..schemas.messages import ConversationRecord, Message
@@ -58,7 +59,7 @@ class S2MConfig:
 
 def s2m(
     records: Iterable[ConversationRecord],
-    config: Optional[S2MConfig] = None,
+    config: Optional[S2MConfig | dict] = None,
 ) -> Iterator[ConversationRecord]:
     """Convert single-turn Q&A pairs to multi-turn conversations.
 
@@ -80,21 +81,28 @@ def s2m(
     Yields:
         Multi-turn conversation records
     """
-    config = config or S2MConfig()
+    # Allow YAML params to pass a raw dict; coerce into S2MConfig
+    if config is None:
+        cfg = S2MConfig()
+    elif isinstance(config, dict):
+        cfg = S2MConfig(**config)
+    else:
+        cfg = config
 
-    if not config.enabled:
+    if not cfg.enabled:
         logger.info("S2M stage disabled, passing through")
         yield from records
         return
 
     # Try Ollama local path first when requested; otherwise, skip to fallback until Strands is wired
-    use_ollama = config.provider.lower() == "ollama"
+    use_ollama = cfg.provider.lower() == "ollama"
     ollama_client = None
     if use_ollama:
         try:
             from ollama import Client  # type: ignore
 
-            ollama_client = Client()
+            host = os.getenv("OLLAMA_HOST")
+            ollama_client = Client(host=host) if host else Client()
         except Exception as e:
             logger.warning(f"Ollama client unavailable: {e}. Falling back.")
             ollama_client = None
@@ -112,7 +120,7 @@ def s2m(
             and rec.messages[0].role == "user"
             and rec.messages[1].role == "assistant"
         ):
-            if ollama_client is not None and config.model_name:
+            if ollama_client is not None and cfg.model_name:
                 # Attempt a minimal 2 extra turns generation via Ollama chat
                 try:
                     user_q = rec.messages[0].content
@@ -123,16 +131,16 @@ def s2m(
                         f"Q: {user_q}\nA: {assistant_a}\n\nReturn only the follow-up question."
                     )
                     q_resp = ollama_client.generate(
-                        model=config.model_name,
+                        model=cfg.model_name,
                         prompt=prompt,
-                        options={"temperature": max(0.0, min(1.0, config.temperature))},
+                        options={"temperature": max(0.0, min(1.0, cfg.temperature))},
                     )
                     followup_q = (q_resp.get("response") or "Could you give an example?").strip()
 
                     a_resp = ollama_client.generate(
-                        model=config.model_name,
+                        model=cfg.model_name,
                         prompt=f"User asked: {followup_q}\nProvide a concise, accurate answer.",
-                        options={"temperature": max(0.0, min(1.0, config.temperature))},
+                        options={"temperature": max(0.0, min(1.0, cfg.temperature))},
                     )
                     followup_a = (a_resp.get("response") or "[Answer]").strip()
 
@@ -149,7 +157,7 @@ def s2m(
                             "original_turns": 2,
                             "generated_turns": 4,
                             "provider": "ollama",
-                            "model": config.model_name,
+                            "model": cfg.model_name,
                         },
                         source=rec.source,
                         id=rec.id,

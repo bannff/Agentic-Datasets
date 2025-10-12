@@ -21,9 +21,6 @@ requires-python = ">=3.9"
    "tiktoken>=0.7",
    "datasketch>=1.6",
    "langchain-text-splitters>=0.3.0",
-   # Strands SDK for agentic orchestration
-   "strands-agents>=1.0.0",
-   "strands-agents-tools>=0.2.0",
  ]
 
  [project.optional-dependencies]
@@ -59,6 +56,12 @@ requires-python = ">=3.9"
 # Local provider: Ollama
 ollama = [
   "ollama>=0.1.0",
+]
+
+# Optional: Strands SDK and tool catalog for agentic orchestration
+strands = [
+  "strands-agents>=1.0.0",
+  "strands-agents-tools>=0.2.0",
 ]
 
  [project.scripts]

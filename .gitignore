@@ -21,9 +21,16 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv*/
 venv/
+venv*/
 env/
+env*/
+.env/
+.env*/
 .python-version
+pip-local/
+pip-selfcheck.json
 
 # Python tooling
 .mypy_cache/
