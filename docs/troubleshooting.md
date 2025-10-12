@@ -42,18 +42,6 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"code": "513",
-	"severity": 8,
-	"message": "Property if [ -z \"$CONFIG_PATH\" ]; then CONFIG_PATH=\"${DEFAULT_CONFIG:-examples/pipeline.example.yaml}\" fi echo \"Using pipeline config is not allowed.",
-	"source": "yaml-schema: GitHub Workflow",
-	"startLineNumber": 28,
-	"startColumn": 11,
-	"endLineNumber": 31,
-	"endColumn": 38,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
@@ -93,6 +81,617 @@
 	"startColumn": 11,
 	"endLineNumber": 32,
 	"endColumn": 68,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Required property is missing: jobs",
+	"startLineNumber": 1,
+	"startColumn": 1,
+	"endLineNumber": 60,
+	"endColumn": 15,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Unexpected value 'name'",
+	"startLineNumber": 4,
+	"startColumn": 3,
+	"endLineNumber": 4,
+	"endColumn": 7,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Unexpected value 'on'",
+	"startLineNumber": 6,
+	"startColumn": 3,
+	"endLineNumber": 6,
+	"endColumn": 5,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Unexpected value 'jobs'",
+	"startLineNumber": 16,
+	"startColumn": 3,
+	"endLineNumber": 16,
+	"endColumn": 7,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Required property is missing: jobs",
+	"startLineNumber": 1,
+	"startColumn": 1,
+	"endLineNumber": 57,
+	"endColumn": 15,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Unexpected value 'jobs'",
+	"startLineNumber": 13,
+	"startColumn": 3,
+	"endLineNumber": 13,
+	"endColumn": 7,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "All mapping items must start at the same column at line 20, column 1:\n\n          python-version: '3.11'\n      name: Nightly Pipeline\n^\n",
+	"startLineNumber": 20,
+	"startColumn": 1,
+	"endLineNumber": 20,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "All mapping items must start at the same column",
+	"source": "YAML",
+	"startLineNumber": 20,
+	"startColumn": 1,
+	"endLineNumber": 20,
+	"endColumn": 30,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 20, column 13:\n\n      name: Nightly Pipeline\n            ^\n",
+	"startLineNumber": 20,
+	"startColumn": 13,
+	"endLineNumber": 20,
+	"endColumn": 14,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 20,
+	"startColumn": 13,
+	"endLineNumber": 20,
+	"endColumn": 30,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 20,
+	"startColumn": 13,
+	"endLineNumber": 20,
+	"endColumn": 30,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 20, column 13:\n\n      name: Nightly Pipeline\n            ^\n",
+	"startLineNumber": 20,
+	"startColumn": 13,
+	"endLineNumber": 21,
+	"endColumn": 12,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "A block sequence may not be used as an implicit map key at line 24, column 1:\n\n          pip install -e .[dev]\n      - name: Run pipeline\n^\n",
+	"startLineNumber": 24,
+	"startColumn": 1,
+	"endLineNumber": 24,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "A block sequence may not be used as an implicit map key",
+	"source": "YAML",
+	"startLineNumber": 24,
+	"startColumn": 1,
+	"endLineNumber": 24,
+	"endColumn": 28,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 24, column 7:\n\n          pip install -e .[dev]\n      - name: Run pipeline\n      ^\n",
+	"startLineNumber": 24,
+	"startColumn": 7,
+	"endLineNumber": 24,
+	"endColumn": 8,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 24,
+	"startColumn": 7,
+	"endLineNumber": 24,
+	"endColumn": 28,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit map keys need to be followed by map values",
+	"source": "YAML",
+	"startLineNumber": 24,
+	"startColumn": 7,
+	"endLineNumber": 24,
+	"endColumn": 28,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit map keys need to be followed by map values at line 24, column 7:\n\n          pip install -e .[dev]\n      - name: Run pipeline\n      ^\n",
+	"startLineNumber": 24,
+	"startColumn": 7,
+	"endLineNumber": 49,
+	"endColumn": 13,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Required property is missing: runs-on",
+	"startLineNumber": 16,
+	"startColumn": 5,
+	"endLineNumber": 57,
+	"endColumn": 13,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 4,
+	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
+	"startLineNumber": 17,
+	"startColumn": 28,
+	"endLineNumber": 17,
+	"endColumn": 59,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 4,
+	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
+	"startLineNumber": 18,
+	"startColumn": 25,
+	"endLineNumber": 18,
+	"endColumn": 53,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 4,
+	"message": "Context access might be invalid: PUBLISH_REPO_ID",
+	"startLineNumber": 19,
+	"startColumn": 24,
+	"endLineNumber": 19,
+	"endColumn": 51,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 4,
+	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
+	"startLineNumber": 20,
+	"startColumn": 26,
+	"endLineNumber": 20,
+	"endColumn": 55,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 4,
+	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
+	"startLineNumber": 21,
+	"startColumn": 30,
+	"endLineNumber": 21,
+	"endColumn": 66,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Map keys must be unique",
+	"source": "YAML",
+	"startLineNumber": 7,
+	"startColumn": 12,
+	"endLineNumber": 7,
+	"endColumn": 13,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 8, column 7:\n\nname: Nightly Pipeline\n      ^\n",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 8,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 24,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 24,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 8, column 7:\n\nname: Nightly Pipeline\n      ^\n",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 9,
+	"endColumn": 20,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 9, column 22:\n\n        description: Override YAML pipeline config path\n                     ^\n",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 23,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 57,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 57,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 9, column 22:\n\n        description: Override YAML pipeline config path\n                     ^\n",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 10,
+	"endColumn": 17,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 10, column 19:\n\n        required: false\n                  ^\n",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 20,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 25,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 25,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 10, column 19:\n\n        required: false\n                  ^\n",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 11,
+	"endColumn": 16,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Map keys must be unique",
+	"source": "YAML",
+	"startLineNumber": 7,
+	"startColumn": 12,
+	"endLineNumber": 7,
+	"endColumn": 13,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 8, column 7:\n\nname: Nightly Pipeline\n      ^\n",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 8,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 24,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 8,
+	"endColumn": 24,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 8, column 7:\n\nname: Nightly Pipeline\n      ^\n",
+	"startLineNumber": 8,
+	"startColumn": 7,
+	"endLineNumber": 9,
+	"endColumn": 20,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 9, column 22:\n\n        description: Override YAML pipeline config path\n                     ^\n",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 23,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 57,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 9,
+	"endColumn": 57,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 9, column 22:\n\n        description: Override YAML pipeline config path\n                     ^\n",
+	"startLineNumber": 9,
+	"startColumn": 22,
+	"endLineNumber": 10,
+	"endColumn": 17,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings at line 10, column 19:\n\n        required: false\n                  ^\n",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 20,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Nested mappings are not allowed in compact mappings",
+	"source": "YAML",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 25,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line",
+	"source": "YAML",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 10,
+	"endColumn": 25,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 10, column 19:\n\n        required: false\n                  ^\n",
+	"startLineNumber": 10,
+	"startColumn": 19,
+	"endLineNumber": 11,
+	"endColumn": 16,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"severity": 8,
+	"message": "Map keys must be unique",
+	"source": "YAML",
+	"startLineNumber": 35,
+	"startColumn": 1,
+	"endLineNumber": 35,
+	"endColumn": 7,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "All mapping items must start at the same column at line 27, column 1:\n\n            DEFAULT_CONFIG=\"${NIGHTLY_CONFIG_PATH:-}\"\n          CONFIG_PATH=\"${{ inputs.config_path }}\"\n^\n",
+	"startLineNumber": 27,
+	"startColumn": 1,
+	"endLineNumber": 27,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 27, column 11:\n\n            DEFAULT_CONFIG=\"${NIGHTLY_CONFIG_PATH:-}\"\n          CONFIG_PATH=\"${{ inputs.config_path }}\"\n          ^\n",
+	"startLineNumber": 27,
+	"startColumn": 11,
+	"endLineNumber": 31,
+	"endColumn": 38,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
+	"startLineNumber": 32,
+	"startColumn": 1,
+	"endLineNumber": 32,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+	"startLineNumber": 32,
+	"startColumn": 11,
+	"endLineNumber": 32,
+	"endColumn": 67,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "All mapping items must start at the same column at line 28, column 1:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n^\n",
+	"startLineNumber": 28,
+	"startColumn": 1,
+	"endLineNumber": 28,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit keys need to be on a single line at line 28, column 11:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n          ^\n",
+	"startLineNumber": 28,
+	"startColumn": 11,
+	"endLineNumber": 31,
+	"endColumn": 38,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
+	"startLineNumber": 32,
+	"startColumn": 1,
+	"endLineNumber": 32,
+	"endColumn": 2,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+	"startLineNumber": 32,
+	"startColumn": 11,
+	"endLineNumber": 32,
+	"endColumn": 67,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
@@ -146,28 +745,6 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 27,
-	"startColumn": 1,
-	"endLineNumber": 27,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line",
-	"source": "YAML",
-	"startLineNumber": 27,
-	"startColumn": 11,
-	"endLineNumber": 27,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "Implicit keys need to be on a single line at line 27, column 11:\n\n            DEFAULT_CONFIG=\"${NIGHTLY_CONFIG_PATH:-}\"\n          CONFIG_PATH=\"${{ inputs.config_path }}\"\n          ^\n",
@@ -188,17 +765,6 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
@@ -206,185 +772,6 @@
 	"startColumn": 11,
 	"endLineNumber": 32,
 	"endColumn": 67,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 27, column 1:\n\n            DEFAULT_CONFIG=\"${NIGHTLY_CONFIG_PATH:-}\"\n          CONFIG_PATH=\"${{ inputs.config_path }}\"\n^\n",
-	"startLineNumber": 27,
-	"startColumn": 1,
-	"endLineNumber": 27,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 27,
-	"startColumn": 1,
-	"endLineNumber": 27,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line",
-	"source": "YAML",
-	"startLineNumber": 27,
-	"startColumn": 11,
-	"endLineNumber": 27,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line at line 27, column 11:\n\n            DEFAULT_CONFIG=\"${NIGHTLY_CONFIG_PATH:-}\"\n          CONFIG_PATH=\"${{ inputs.config_path }}\"\n          ^\n",
-	"startLineNumber": 27,
-	"startColumn": 11,
-	"endLineNumber": 31,
-	"endColumn": 38,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 67,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 28, column 1:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n^\n",
-	"startLineNumber": 28,
-	"startColumn": 1,
-	"endLineNumber": 28,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 28,
-	"startColumn": 1,
-	"endLineNumber": 28,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line",
-	"source": "YAML",
-	"startLineNumber": 28,
-	"startColumn": 11,
-	"endLineNumber": 28,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line at line 28, column 11:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n          ^\n",
-	"startLineNumber": 28,
-	"startColumn": 11,
-	"endLineNumber": 31,
-	"endColumn": 38,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 67,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 68,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
@@ -398,17 +785,6 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 29,
-	"startColumn": 1,
-	"endLineNumber": 29,
-	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "'jobs' is already defined",
@@ -416,17 +792,6 @@
 	"startColumn": 1,
 	"endLineNumber": 34,
 	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 34,
-	"startColumn": 1,
-	"endLineNumber": 34,
-	"endColumn": 7,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
@@ -502,47 +867,6 @@
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
-	"message": "Expected a scalar value, a sequence, or a mapping",
-	"startLineNumber": 2,
-	"startColumn": 2,
-	"endLineNumber": 2,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "'name' is already defined",
-	"startLineNumber": 2,
-	"startColumn": 1,
-	"endLineNumber": 2,
-	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 2,
-	"startColumn": 1,
-	"endLineNumber": 2,
-	"endColumn": 35,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Unexpected value 'on'",
-	"startLineNumber": 5,
-	"startColumn": 3,
-	"endLineNumber": 5,
-	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
 	"message": "Required property is missing: jobs",
 	"startLineNumber": 1,
 	"startColumn": 1,
@@ -558,17 +882,6 @@
 	"startColumn": 1,
 	"endLineNumber": 2,
 	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 2,
-	"startColumn": 1,
-	"endLineNumber": 2,
-	"endColumn": 35,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
@@ -614,6 +927,26 @@
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
+	"message": "'name' is already defined",
+	"startLineNumber": 2,
+	"startColumn": 1,
+	"endLineNumber": 2,
+	"endColumn": 5,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
+	"message": "Unexpected value 'on'",
+	"startLineNumber": 5,
+	"startColumn": 3,
+	"endLineNumber": 5,
+	"endColumn": 5,
+	"origin": "extHost1"
+},{
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
+	"owner": "_generated_diagnostic_collection_name_#4",
+	"severity": 8,
 	"message": "Required property is missing: jobs",
 	"startLineNumber": 1,
 	"startColumn": 1,
@@ -629,17 +962,6 @@
 	"startColumn": 1,
 	"endLineNumber": 2,
 	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 2,
-	"startColumn": 1,
-	"endLineNumber": 2,
-	"endColumn": 35,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
@@ -682,7 +1004,7 @@
 	"endColumn": 13,
 	"origin": "extHost1"
 },{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
+	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/self_hosted_ollama.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "Expected a scalar value, a sequence, or a mapping",
@@ -703,17 +1025,6 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 3,
-	"startColumn": 1,
-	"endLineNumber": 3,
-	"endColumn": 22,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
 	"message": "'name' is already defined",
@@ -724,14 +1035,13 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
+	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
+	"message": "'name' is already defined",
 	"startLineNumber": 3,
 	"startColumn": 1,
 	"endLineNumber": 3,
-	"endColumn": 22,
+	"endColumn": 5,
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
@@ -765,848 +1075,12 @@
 	"origin": "extHost1"
 },{
 	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 3,
-	"startColumn": 1,
-	"endLineNumber": 3,
-	"endColumn": 22,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
 	"owner": "_generated_diagnostic_collection_name_#4",
 	"severity": 8,
-	"message": "'name' is already defined",
-	"startLineNumber": 3,
-	"startColumn": 1,
-	"endLineNumber": 3,
-	"endColumn": 5,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/smoke_hosted.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Map keys must be unique",
-	"source": "YAML",
-	"startLineNumber": 3,
-	"startColumn": 1,
-	"endLineNumber": 3,
-	"endColumn": 22,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
-	"startLineNumber": 26,
-	"startColumn": 27,
-	"endLineNumber": 26,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 44,
-	"startColumn": 21,
-	"endLineNumber": 44,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 45,
-	"startColumn": 20,
-	"endLineNumber": 45,
-	"endColumn": 47,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 46,
-	"startColumn": 22,
-	"endLineNumber": 46,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 48,
-	"startColumn": 43,
-	"endLineNumber": 48,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
-	"startLineNumber": 26,
-	"startColumn": 27,
-	"endLineNumber": 26,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 43,
-	"startColumn": 13,
-	"endLineNumber": 43,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 43,
-	"startColumn": 13,
-	"endLineNumber": 43,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 43,
-	"startColumn": 13,
-	"endLineNumber": 43,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 45,
-	"startColumn": 34,
-	"endLineNumber": 45,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 47,
-	"startColumn": 51,
-	"endLineNumber": 47,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 47,
-	"startColumn": 82,
-	"endLineNumber": 47,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 47,
-	"startColumn": 112,
-	"endLineNumber": 47,
-	"endColumn": 141,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
-	"startLineNumber": 26,
-	"startColumn": 27,
-	"endLineNumber": 26,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
-	"startLineNumber": 26,
-	"startColumn": 27,
-	"endLineNumber": 26,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 28, column 1:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n^\n",
-	"startLineNumber": 28,
-	"startColumn": 1,
-	"endLineNumber": 28,
+	"message": "Expected a scalar value, a sequence, or a mapping",
+	"startLineNumber": 2,
+	"startColumn": 2,
+	"endLineNumber": 2,
 	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 28,
-	"startColumn": 1,
-	"endLineNumber": 28,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line",
-	"source": "YAML",
-	"startLineNumber": 28,
-	"startColumn": 11,
-	"endLineNumber": 28,
-	"endColumn": 42,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit keys need to be on a single line at line 28, column 11:\n\n            CONFIG_PATH=\"${{ inputs.config_path }}\"\n          if [ -z \"$CONFIG_PATH\" ]; then\n          ^\n",
-	"startLineNumber": 28,
-	"startColumn": 11,
-	"endLineNumber": 31,
-	"endColumn": 38,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "All mapping items must start at the same column at line 32, column 1:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n^\n",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 2,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "All mapping items must start at the same column",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 1,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values at line 32, column 11:\n\n          echo \"Using pipeline config: $CONFIG_PATH\"\n          python -m agentic_datasets.cli run-config \"$CONFIG_PATH\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 67,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#1",
-	"severity": 8,
-	"message": "Implicit map keys need to be followed by map values",
-	"source": "YAML",
-	"startLineNumber": 32,
-	"startColumn": 11,
-	"endLineNumber": 32,
-	"endColumn": 68,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/nightly.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: NIGHTLY_CONFIG_PATH",
-	"startLineNumber": 26,
-	"startColumn": 27,
-	"endLineNumber": 26,
-	"endColumn": 58,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 22,
-	"startColumn": 20,
-	"endLineNumber": 22,
-	"endColumn": 48,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 23,
-	"startColumn": 20,
-	"endLineNumber": 23,
-	"endColumn": 47,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 24,
-	"startColumn": 20,
-	"endLineNumber": 24,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 27,
-	"startColumn": 41,
-	"endLineNumber": 27,
-	"endColumn": 77,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 28,
-	"startColumn": 51,
-	"endLineNumber": 28,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 28,
-	"startColumn": 82,
-	"endLineNumber": 28,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 28,
-	"startColumn": 112,
-	"endLineNumber": 28,
-	"endColumn": 141,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 12,
-	"startColumn": 25,
-	"endLineNumber": 12,
-	"endColumn": 53,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 13,
-	"startColumn": 24,
-	"endLineNumber": 13,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 14,
-	"startColumn": 26,
-	"endLineNumber": 14,
-	"endColumn": 55,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 15,
-	"startColumn": 30,
-	"endLineNumber": 15,
-	"endColumn": 66,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 12,
-	"startColumn": 25,
-	"endLineNumber": 12,
-	"endColumn": 53,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 13,
-	"startColumn": 24,
-	"endLineNumber": 13,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 14,
-	"startColumn": 26,
-	"endLineNumber": 14,
-	"endColumn": 55,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 15,
-	"startColumn": 30,
-	"endLineNumber": 15,
-	"endColumn": 66,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 22,
-	"startColumn": 20,
-	"endLineNumber": 22,
-	"endColumn": 48,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 23,
-	"startColumn": 20,
-	"endLineNumber": 23,
-	"endColumn": 47,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 24,
-	"startColumn": 20,
-	"endLineNumber": 24,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 27,
-	"startColumn": 41,
-	"endLineNumber": 27,
-	"endColumn": 77,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 28,
-	"startColumn": 51,
-	"endLineNumber": 28,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 28,
-	"startColumn": 82,
-	"endLineNumber": 28,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 28,
-	"startColumn": 112,
-	"endLineNumber": 28,
-	"endColumn": 141,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 12,
-	"startColumn": 25,
-	"endLineNumber": 12,
-	"endColumn": 53,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 13,
-	"startColumn": 24,
-	"endLineNumber": 13,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 14,
-	"startColumn": 26,
-	"endLineNumber": 14,
-	"endColumn": 55,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 15,
-	"startColumn": 30,
-	"endLineNumber": 15,
-	"endColumn": 66,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 20,
-	"startColumn": 20,
-	"endLineNumber": 20,
-	"endColumn": 48,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 21,
-	"startColumn": 20,
-	"endLineNumber": 21,
-	"endColumn": 47,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 22,
-	"startColumn": 20,
-	"endLineNumber": 22,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 25,
-	"startColumn": 41,
-	"endLineNumber": 25,
-	"endColumn": 77,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 26,
-	"startColumn": 51,
-	"endLineNumber": 26,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 26,
-	"startColumn": 82,
-	"endLineNumber": 26,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 26,
-	"startColumn": 112,
-	"endLineNumber": 26,
-	"endColumn": 141,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 20,
-	"startColumn": 20,
-	"endLineNumber": 20,
-	"endColumn": 48,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 21,
-	"startColumn": 20,
-	"endLineNumber": 21,
-	"endColumn": 47,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 22,
-	"startColumn": 20,
-	"endLineNumber": 22,
-	"endColumn": 49,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 25,
-	"startColumn": 41,
-	"endLineNumber": 25,
-	"endColumn": 77,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 26,
-	"startColumn": 51,
-	"endLineNumber": 26,
-	"endColumn": 79,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 26,
-	"startColumn": 82,
-	"endLineNumber": 26,
-	"endColumn": 109,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 26,
-	"startColumn": 112,
-	"endLineNumber": 26,
-	"endColumn": 141,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_ENTRY_ID",
-	"startLineNumber": 12,
-	"startColumn": 25,
-	"endLineNumber": 12,
-	"endColumn": 53,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_REPO_ID",
-	"startLineNumber": 13,
-	"startColumn": 24,
-	"endLineNumber": 13,
-	"endColumn": 51,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PUBLISH_DATA_PATH",
-	"startLineNumber": 14,
-	"startColumn": 26,
-	"endLineNumber": 14,
-	"endColumn": 55,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf_on_tag.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 15,
-	"startColumn": 30,
-	"endLineNumber": 15,
-	"endColumn": 66,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 34,
-	"startColumn": 34,
-	"endLineNumber": 34,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/publish_hf.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: HUGGINGFACE_HUB_TOKEN",
-	"startLineNumber": 33,
-	"startColumn": 34,
-	"endLineNumber": 33,
-	"endColumn": 70,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/.github/workflows/release.yml",
-	"owner": "_generated_diagnostic_collection_name_#4",
-	"severity": 4,
-	"message": "Context access might be invalid: PYPI_API_TOKEN",
-	"startLineNumber": 24,
-	"startColumn": 21,
-	"endLineNumber": 24,
-	"endColumn": 50,
 	"origin": "extHost1"
 }]
