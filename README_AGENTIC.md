@@ -40,6 +40,26 @@ Notes
 - Set HF token: huggingface-cli login
 - CI runs lint/type-check/tests on PRs; release workflow publishes to PyPI on tags (requires PYPI_API_TOKEN secret)
 
+## Self-hosted runner with Ollama (CI)
+
+If you need model-backed stages (e.g., S2M with Ollama) in CI, the simplest approach is a self-hosted runner with Ollama installed.
+
+Steps (macOS or Linux host):
+
+1) Create/assign a self-hosted runner to this repo or org
+  - GitHub → Settings → Actions → Runners → New self-hosted runner
+  - Follow the registration script on the target machine
+
+2) Install Ollama and pull models on the runner
+  - Install Ollama (https://ollama.com/download)
+  - Ensure the service is running and pre-pull models to cache, e.g.: `ollama pull qwen3:8b`
+
+3) Trigger the workflow
+  - Workflow: `.github/workflows/self_hosted_ollama.yml`
+  - Run it from GitHub Actions (workflow_dispatch) and optionally override the `config` input
+
+The workflow verifies http://localhost:11434, installs `agentic-datasets` with `[ollama]` extra, runs the pipeline, and uploads `out*.jsonl` files as artifacts. No OLLAMA_HOST is needed beyond localhost.
+
 ## Strands-SDK Docs:
 
 - Quick Start:
