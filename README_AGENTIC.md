@@ -179,6 +179,12 @@ https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-pr
 https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/ollama/
   Notes: Requires local Ollama daemon (default http://localhost:11434). Use `ollama pull qwen3:8b`.
 
+## Local Ollama notes
+
+- Set OLLAMA_HOST if your daemon isn't on http://localhost:11434, e.g. `export OLLAMA_HOST=http://remote-host:11434`.
+- The S2M stage prefers a Strands Agent with OllamaModel and S2M prompts. If Strands isn't installed, it falls back to a direct Ollama HTTP call.
+- Use `examples/pipeline.ollama.yaml` (with `orchestrator: strands`) to exercise the agent path locally.
+
 - LiteLLM:
 https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/litellm/
 

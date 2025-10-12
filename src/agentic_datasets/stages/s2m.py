@@ -19,10 +19,11 @@ from __future__ import annotations
 
 import logging
 import os
+import importlib
 from typing import Iterable, Iterator, Optional
 
 from ..schemas.messages import ConversationRecord, Message
-from ..agents import validate_provider_credentials
+from ..agents.prompts import S2M_SYSTEM_PROMPT, S2M_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +95,24 @@ def s2m(
         yield from records
         return
 
-    # Try Ollama local path first when requested; otherwise, skip to fallback until Strands is wired
+    # Try Strands agent path first if available and provider is ollama; otherwise, use direct Ollama fallback
     use_ollama = cfg.provider.lower() == "ollama"
     ollama_client = None
+    strands_agent = None
+    if use_ollama:
+        # Attempt to build a Strands Agent with Ollama model (dynamic import to avoid optional-deps lint errors)
+        try:
+            strands_module = importlib.import_module("strands")
+            ollama_module = importlib.import_module("strands.models.ollama")
+
+            Agent = getattr(strands_module, "Agent")
+            OllamaModel = getattr(ollama_module, "OllamaModel")
+
+            host = os.getenv("OLLAMA_HOST") or "http://localhost:11434"
+            model = OllamaModel(host=host, model_id=cfg.model_name or "qwen3:8b")
+            strands_agent = Agent(model=model)
+        except Exception:
+            strands_agent = None
     if use_ollama:
         try:
             from ollama import Client  # type: ignore
@@ -120,6 +136,51 @@ def s2m(
             and rec.messages[0].role == "user"
             and rec.messages[1].role == "assistant"
         ):
+            # Prefer Strands agent if available
+            if strands_agent is not None:
+                try:
+                    user_q = rec.messages[0].content
+                    assistant_a = rec.messages[1].content
+                    prompt = S2M_USER_TEMPLATE.format(question=user_q, answer=assistant_a)
+                    # Compose with system prompt
+                    result = strands_agent(
+                        prompt,
+                        system_prompt=S2M_SYSTEM_PROMPT,
+                        params={"temperature": max(0.0, min(1.0, cfg.temperature))},
+                    )
+                    # Expect JSON array of messages in result.text or result.content
+                    text = getattr(result, "text", None) or getattr(result, "content", None) or str(result)
+                    import json as _json
+
+                    msgs_data = _json.loads(text)
+                    messages: list[Message] = []
+                    for m in msgs_data:
+                        role = m.get("role")
+                        content = m.get("content", "").strip()
+                        if not role or not content:
+                            continue
+                        messages.append(Message(role=role, content=content))
+
+                    # Ensure at least original + 2 new turns; otherwise fallback
+                    if len(messages) >= 4:
+                        yield ConversationRecord(
+                            messages=messages,
+                            metadata={
+                                **(rec.metadata or {}),
+                                "stage": "s2m",
+                                "original_turns": 2,
+                                "generated_turns": len(messages),
+                                "provider": "ollama",
+                                "model": cfg.model_name,
+                                "via": "strands",
+                            },
+                            source=rec.source,
+                            id=rec.id,
+                        )
+                        continue
+                except Exception as e:
+                    logger.warning(f"Strands S2M failed: {e}. Falling back for {rec.id}")
+
             if ollama_client is not None and cfg.model_name:
                 # Attempt a minimal 2 extra turns generation via Ollama chat
                 try:

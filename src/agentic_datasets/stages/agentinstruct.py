@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """AgentInstruct Stage: expand single-turn seeds into k diverse instruction variants.
 
 This stage is intentionally provider-agnostic for now. It performs a lightweight,
@@ -14,6 +12,8 @@ Outputs multiple ConversationRecord items for each input record (fan-out), each 
 - optional retention of original assistant reply if present
 - metadata augmented with origin_id, variant_id, variant_prompt, dedupe_score
 """
+
+from __future__ import annotations
 
 from typing import Iterable, Iterator, List, Optional, Dict, Any
 import hashlib
