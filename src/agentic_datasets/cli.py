@@ -8,6 +8,7 @@ import typer
 from .config import PipelineConfig
 from .pipeline import run_pipeline
 from .pipeline import ingest, normalize, export
+from .metrics import summarize_metrics
 from .transforms.chunking import chunk_dataset
 from .register_defaults import register_defaults
 from .catalog import load_catalog
@@ -77,6 +78,16 @@ def transforms():
     names = sorted(registry.list().keys())
     for n in names:
         typer.echo(n)
+
+
+@app.command()
+def metrics(
+    data: Path = typer.Argument(..., help="Path to a JSONL output to summarize"),
+    limit: Optional[int] = typer.Option(None, help="Limit number of records for quick summary"),
+):
+    """Summarize tool_calls, tool messages, backends, and via flags from a JSONL file."""
+    res = summarize_metrics(data, limit=limit)
+    typer.echo(res)
 
 
 @app.command("catalog:list")
