@@ -15,6 +15,8 @@ from .catalog import load_catalog
 from .hf_export import push_jsonl
 from .pipeline_config import load_spec, run_spec
 from .registry import registry
+import os
+import json
 
 app = typer.Typer(help="Agentic datasets pipeline CLI")
 register_defaults()
@@ -88,6 +90,55 @@ def metrics(
     """Summarize tool_calls, tool messages, backends, and via flags from a JSONL file."""
     res = summarize_metrics(data, limit=limit)
     typer.echo(res)
+
+
+@app.command()
+def doctor():
+    """Check environment for Strands/Ollama/tools readiness."""
+    report = {
+        "python": {
+            "version": f"{typer.__version__}",
+        },
+        "env": {
+            "OLLAMA_HOST": os.getenv("OLLAMA_HOST", "<unset>"),
+            "AGENTIC_TOOLS_BACKENDS": os.getenv("AGENTIC_TOOLS_BACKENDS", "<unset>"),
+        },
+        "imports": {},
+        "tools_resolution": {},
+    }
+    # Imports
+    try:
+        import strands  # type: ignore
+
+        report["imports"]["strands"] = True
+    except Exception as e:
+        report["imports"]["strands"] = f"Error: {e}"
+    try:
+        import strands.models.ollama as ollama  # type: ignore
+
+        report["imports"]["strands.models.ollama"] = True
+    except Exception as e:
+        report["imports"]["strands.models.ollama"] = f"Error: {e}"
+    # Tools backends order
+    backends = [b.strip() for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands,local").split(",") if b.strip()]
+    report["tools_resolution"]["backend_order"] = backends
+    # Try resolving a couple known tools by name
+    try:
+        from .local_tools import search_cve, dns_lookup  # type: ignore
+
+        report["tools_resolution"]["local_tools"] = True
+    except Exception as e:
+        report["tools_resolution"]["local_tools"] = f"Error: {e}"
+    try:
+        import importlib
+
+        st = importlib.import_module("strands_tools")
+        # Probe presence without enforcing
+        hasattr(st, "search_cve")
+        report["tools_resolution"]["strands_tools"] = True
+    except Exception as e:
+        report["tools_resolution"]["strands_tools"] = f"Error: {e}"
+    typer.echo(json.dumps(report, indent=2))
 
 
 @app.command("catalog:list")

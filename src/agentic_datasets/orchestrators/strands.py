@@ -29,11 +29,15 @@ def run_strands_pipeline(
     Backend order is controlled by env AGENTIC_TOOLS_BACKENDS (comma-separated),
     defaulting to "strands" (strict). Returns a tool message on success; None if no backend resolves.
         """
+        env_backends = os.getenv("AGENTIC_TOOLS_BACKENDS")
         backend_order = [
             b.strip()
-            for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands").lower().split(",")
+            for b in (env_backends if env_backends is not None else "strands,local").lower().split(",")
             if b.strip()
         ]
+        # Always include 'local' as last-resort fallback for deterministic stub tools
+        if "local" not in backend_order:
+            backend_order.append("local")
 
         def _resolve_fn(name: str) -> tuple[Any | None, str | None]:
             for backend in backend_order:

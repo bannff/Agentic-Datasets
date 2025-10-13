@@ -163,8 +163,18 @@ def apigenmt(
                     return s[start : i + 1]
         return s
 
-    def _safe_json_loads(text: str) -> Any:
-        """Robust JSON loader that can handle extra prose around an array."""
+    def _safe_json_loads(payload: Any) -> Any:
+        """Robust JSON loader that can handle structured payloads or extra prose.
+
+        Accepts:
+        - list/dict: returns as-is
+        - str: attempts json.loads, with fallback to extracting a top-level array
+        - other: converts to str then attempts json.loads
+        """
+        # If already structured, return directly
+        if isinstance(payload, (list, dict)):
+            return payload
+        text = payload if isinstance(payload, str) else str(payload)
         try:
             return json.loads(text)
         except Exception:
@@ -277,13 +287,23 @@ def apigenmt(
                 system_prompt=APIGENMT_SYSTEM_PROMPT,
                 params={"temperature": cfg.temperature},
             )
-            text = getattr(result, "text", None) or getattr(result, "content", None) or str(result)
-            data = _safe_json_loads(text)
+            raw = getattr(result, "text", None) or getattr(result, "content", None) or result
+            data = _safe_json_loads(raw)
 
             new_messages: List[Message] = []
             for m in data:
                 role = m.get("role")
-                content = (m.get("content") or "").strip()
+                raw_content = m.get("content")
+                if isinstance(raw_content, str):
+                    content = raw_content.strip()
+                elif raw_content is None:
+                    content = ""
+                else:
+                    # Preserve structure but ensure Message.content is a string
+                    try:
+                        content = json.dumps(raw_content, ensure_ascii=False)
+                    except Exception:
+                        content = str(raw_content)
                 if not role or not content:
                     continue
                 # Assistant messages may contain tool_calls
