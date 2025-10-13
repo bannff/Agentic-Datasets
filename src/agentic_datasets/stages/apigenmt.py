@@ -136,6 +136,82 @@ def apigenmt(
                 logger.debug(f"Failed to parse tool_call {raw}: {e}")
         return out
 
+    def _extract_json_array(text: str) -> str:
+        """Try to extract a top-level JSON array substring from mixed text.
+
+        Many LLMs wrap JSON with prose. This looks for the first '[' and returns
+        the balanced bracket substring. Falls back to original text if not found.
+        """
+        s = text.strip()
+        if not s:
+            return s
+        # Fast path
+        if s.startswith("[") and s.endswith("]"):
+            return s
+        # Find first '['
+        start = s.find("[")
+        if start == -1:
+            return s
+        depth = 0
+        for i in range(start, len(s)):
+            c = s[i]
+            if c == '[':
+                depth += 1
+            elif c == ']':
+                depth -= 1
+                if depth == 0:
+                    return s[start : i + 1]
+        return s
+
+    def _safe_json_loads(text: str) -> Any:
+        """Robust JSON loader that can handle extra prose around an array."""
+        try:
+            return json.loads(text)
+        except Exception:
+            extracted = _extract_json_array(text)
+            return json.loads(extracted)
+
+    def _enforce_turn_alternation(messages: List[Message]) -> List[Message]:
+        """Merge consecutive user/assistant turns to satisfy schema validator.
+
+        - If two consecutive 'assistant' (or 'user') messages occur, merge content and
+          combine tool_calls to avoid consecutive same-role messages.
+        - Tool messages are left as-is (validator allows consecutive tools).
+        """
+        if not messages:
+            return messages
+        merged: List[Message] = []
+        for m in messages:
+            if (
+                merged
+                and m.role in ("user", "assistant")
+                and merged[-1].role == m.role
+            ):
+                last = merged[-1]
+                # Merge content with a separator to retain semantics
+                new_content = (last.content or "").rstrip() + "\n\n" + (m.content or "").lstrip()
+                # Combine tool calls if any (for assistant)
+                if last.tool_calls or m.tool_calls:
+                    combined_tc: List[ToolCall] = []
+                    if last.tool_calls:
+                        combined_tc.extend(last.tool_calls)
+                    if m.tool_calls:
+                        combined_tc.extend(m.tool_calls)
+                else:
+                    combined_tc = None  # type: ignore
+                merged[-1] = Message(
+                    role=last.role,
+                    content=new_content,
+                    metadata=last.metadata,
+                    tool_calls=combined_tc,
+                    tool_name=last.tool_name,
+                    tool_call_id=last.tool_call_id,
+                    tool_output=last.tool_output,
+                )
+            else:
+                merged.append(m)
+        return merged
+
     def _synthesize_tool_call_record(rec: ConversationRecord) -> ConversationRecord:
         tool = cfg.tools[0] or {}
         name = tool.get("name") or "tool"
@@ -202,7 +278,7 @@ def apigenmt(
                 params={"temperature": cfg.temperature},
             )
             text = getattr(result, "text", None) or getattr(result, "content", None) or str(result)
-            data = json.loads(text)
+            data = _safe_json_loads(text)
 
             new_messages: List[Message] = []
             for m in data:
@@ -232,6 +308,9 @@ def apigenmt(
                     new_messages.append(
                         Message(role=role, content=content, tool_calls=tool_calls)
                     )
+
+            # Enforce alternation constraint to prevent schema validation errors
+            new_messages = _enforce_turn_alternation(new_messages)
 
             if not new_messages:
                 raise ValueError("APIGenMT returned empty/invalid conversation")
