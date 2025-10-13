@@ -1,19 +1,50 @@
 # Agentic Datasets
 
-![CI](https://github.com/bannff/datasets/actions/workflows/ci.yml/badge.svg)
-![Smoke](https://github.com/bannff/datasets/actions/workflows/smoke.yml/badge.svg)
-![Docker](https://github.com/bannff/datasets/actions/workflows/docker.yml/badge.svg)
-![Run Pipeline](https://github.com/bannff/datasets/actions/workflows/run_pipeline.yml/badge.svg)
+Config-driven pipelines for building agentic, multi-turn datasets with validation, optional tool-call execution, and Hugging Face publishing. Includes a Typer CLI, tests, CI workflows, and Docker.
 
-Config-driven pipelines for building agentic, multi-turn datasets with chunking, validation, optional tool-call execution, and Hugging Face publishing. Includes CLI, tests, CI, Docker image, and Codespaces devcontainer.
+Badges (workflows may vary by fork):
+- CI: .github/workflows/ci.yml
+- Smoke (hosted): .github/workflows/smoke_hosted.yml
+- Self-hosted (Ollama): .github/workflows/self_hosted_ollama.yml
+- Run pipeline (on-demand): .github/workflows/run_pipeline.yml
 
 ## Quickstart
 
-1. Create and activate a virtual environment
-2. Install in editable mode:
-   - pip install -e .[dev]
+1) Create a virtualenv and install in editable mode with dev extras
+- pip install -e .[dev]
 
-CLI commands:
+2) Run an example pipeline
+- agentic-datasets run-config examples/pipeline.example.yaml
+- agentic-datasets run-config examples/pipeline.agentic.yaml
+
+3) List transforms and catalog entries
+- agentic-datasets transforms
+- agentic-datasets catalog:list catalog.yaml
+
+4) Publish a JSONL to Hugging Face (requires login/token)
+- agentic-datasets hf:push <entry_id> <repo_id> <path-to.jsonl> --catalog catalog.yaml
+
+## Local model (Ollama) and Strands-first
+
+- Stages prefer the Strands Agents SDK path and fall back gracefully if unavailable.
+- For local experiments, install Ollama and pull a model (default we use qwen3:8b):
+   - https://ollama.com/download
+   - ollama pull qwen3:8b
+- Use the provided config to exercise the Strands-first S2M/APIGenMT/ReviewInstruct path locally:
+   - agentic-datasets run-config examples/pipeline.ollama.yaml
+- Set OLLAMA_HOST if your daemon is not at http://localhost:11434 (e.g., export OLLAMA_HOST=http://remote:11434).
+
+## Stages implemented
+
+- AgentInstruct: Expand and dedupe instructions prior to multi-turn generation.
+- S2M (Single → Multi-turn): Converts single-turn pairs to coherent multi-turn conversations.
+- APIGenMT: Injects JSON tool calls and tool responses (APIGen-style) when applicable.
+- ReviewInstruct: Multi-agent review with a chairman accept/refine decision and optional refinement.
+
+All stages are wired Strands-first with tested fallbacks. Schemas are strict (Pydantic v2) and export excludes None fields.
+
+## CLI overview
+
 - agentic-datasets run: Ingest → normalize → validate → export
 - agentic-datasets chunk: Token-aware chunking
 - agentic-datasets run-config: Run a YAML pipeline spec
@@ -21,41 +52,113 @@ CLI commands:
 - agentic-datasets catalog:list/show: Inspect dataset catalog
 - agentic-datasets hf:push: Push JSONL to Hugging Face with dataset card
 
-Examples:
-- agentic-datasets run-config examples/pipeline.example.yaml
-- agentic-datasets run-config examples/pipeline.agentic.yaml
+Examples in repo:
+- examples/pipeline.example.yaml
+- examples/pipeline.agentic.yaml
+- examples/pipeline.ollama.yaml
 
-## CI/CD
+## CI/CD (summary)
 
-- Lint/Tests: .github/workflows/ci.yml
-- Devcontainer build + tests: .github/workflows/devcontainer-ci.yml
-- Smoke (Docker image): .github/workflows/smoke.yml
-- Docker build/push to GHCR: .github/workflows/docker.yml
-- Publish to Hugging Face (manual): .github/workflows/publish_hf.yml
+- Hosted smoke checks: .github/workflows/smoke_hosted.yml
+- Self-hosted Ollama pipeline: .github/workflows/self_hosted_ollama.yml (labels: [self-hosted, ollama])
+- Nightly: .github/workflows/nightly.yml (manual-only by design)
 - Publish to Hugging Face on tag: .github/workflows/publish_hf_on_tag.yml
- - Run pipeline on-demand (cloud): .github/workflows/run_pipeline.yml
+- On-demand pipeline runner: .github/workflows/run_pipeline.yml (artifact uploads of out*.jsonl)
 
-Repo secret required for publish: HUGGINGFACE_HUB_TOKEN
+Secrets/vars for publishing:
+- HUGGINGFACE_HUB_TOKEN (secret)
+- Optional tag-publish vars: PUBLISH_ENTRY_ID, PUBLISH_REPO_ID, PUBLISH_DATA_PATH
 
-Auto-publish on tag (optional):
-- Add repository Variables: PUBLISH_ENTRY_ID (catalog entry id), PUBLISH_REPO_ID (e.g., your-org/your-dataset), PUBLISH_DATA_PATH (path to JSONL to publish)
-- Push a tag named dataset-<anything> (e.g., dataset-2025-10-05)
-- The workflow will run and call: agentic-datasets hf:push "$PUBLISH_ENTRY_ID" "$PUBLISH_REPO_ID" "$PUBLISH_DATA_PATH"
+## Strands SDK docs (preserved links)
 
-## Codespaces
+- Quick Start:
+   https://strandsagents.com/latest/documentation/docs/user-guide/quickstart/
 
-Devcontainer is included (.devcontainer/devcontainer.json). Open in Codespaces to get a ready-to-run environment.
+Agents
+- Agent Loop:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/agent-loop/
+- State:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/state/
+- Session Management:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/session-management/
+- Prompts:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/prompts/
+- Hooks:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/hooks/
+- Structured Output:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/structured-output/
+- Conversation Management:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/conversation-management/
 
-## Notes
-## Cloud-first: run pipelines in Actions
+Tools
+- Overview:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/tools/tools_overview/
+- Model Context Protocol (MCP):
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/tools/mcp-tools/
+- Community Tools Package:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/tools/community-tools-package/
 
-You can execute pipelines without Docker or local Python by triggering the on-demand workflow:
+Streaming
+- Overview:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/streaming/overview/
+- Async Iterators:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/streaming/async-iterators/
+- Callback Handlers:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/streaming/callback-handlers/
 
-1. Go to GitHub → Actions → "Run Agentic Pipeline (on-demand)"
-2. Click "Run workflow" and provide a YAML config path (default: examples/pipeline.example.yaml)
-3. The job installs dependencies, runs the pipeline, and uploads any out*.jsonl files as artifacts
+Multi Agent
+- Agent-to-Agent:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/agent-to-agent/
+- Agents As Tools:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/agents-as-tools/
+- Swarm:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/swarm/
+- Graph:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/graph/
+- Workflow:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/workflow/
+- Multi Agent Patterns:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/multi-agent-patterns/
 
-For publishing to HF, use the manual workflow (publish_hf.yml) or tag-triggered one (publish_hf_on_tag.yml).
+Observability & Eval
+- Observability:
+   https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/observability/
+- Metrics:
+   https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/metrics/
+- Traces:
+   https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/traces/
+- Logs:
+   https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/logs/
+- Evaluation:
+   https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/evaluation/
 
-- See `README_AGENTIC.md` for a brief CLI reference.
-- Legacy/large directories are archived; see `docs/LEGACY.md`.
+Model Providers
+- Bedrock:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/amazon-bedrock/
+- Anthropic:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/anthropic/
+- OpenAI:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/openai/
+- MistralAI:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/mistral/
+- llama.cpp:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/llamacpp/
+- Ollama:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/ollama/
+- LiteLLM:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/litellm/
+- LlamaAPI:
+   https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/llamaapi/
+
+## Repo notes
+
+- Examples live in examples/ (sample JSONL and pipelines).
+- Legacy/large directories are archived; see docs/LEGACY.md.
+- If your IDE flags GitHub Actions contexts (vars/secrets) as unknown, those are benign local warnings.
+
+## Status (high level)
+
+- Stages: AgentInstruct, S2M, APIGenMT, ReviewInstruct are implemented with Strands-first paths and tested fallbacks. Unit tests cover key behaviors (including tool-call JSON parsing and review decisions). Nightly workflow is manual-only by design.
+- Publishing: Manual and tag-triggered flows available. Artifacts are uploaded for on-demand runs.
+
+Questions or issues? Open an issue with the pipeline config you’re trying to run and the stage of failure.
