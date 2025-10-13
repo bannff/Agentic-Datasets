@@ -1,5 +1,6 @@
-input: examples/sample.jsonl
-output: examples/out.ollama.jsonl
+input: archive/legacy/PyScience/train.jsonl
+output: examples/out.legacy_pyscience_root.jsonl
+max_records: 50
 orchestrator: strands
 stages:
   - name: agentinstruct
@@ -7,11 +8,10 @@ stages:
       k_variants: 2
   - name: s2m
     params:
-      # S2M now supports local Ollama path. Ensure you have Ollama running and the model pulled.
       config:
         provider: ollama
         model_name: qwen3:8b
-        temperature: 0.4
+        temperature: 0.3
   - name: apigenmt
     params:
       tools:
@@ -20,7 +20,7 @@ stages:
           parameters:
             keyword:
               type: string
-              description: "Search term, e.g. 'sql injection'"
+              description: "Search term, e.g. 'buffer overflow'"
               required: true
         - name: dns_lookup
           description: "Resolve DNS records for a hostname."

@@ -57,6 +57,54 @@ Examples in repo:
 - examples/pipeline.agentic.yaml
 - examples/pipeline.ollama.yaml
 
+## APIGenMT tools (how to wire)
+
+APIGenMT suggests and injects tool calls when you provide a tools catalog in the stage params. We pass that catalog into the prompt so the model knows what’s available, and we then parse JSON tool calls out of assistant messages. After a stage completes, the orchestrator attempts to execute any tool calls via `strands_tools` and inject a `role: tool` message with the result. If a tool isn’t available, we keep the tool call but skip execution.
+
+Minimal example (add to your APIGenMT stage):
+
+```yaml
+stages:
+   - name: apigenmt
+      params:
+         tools:
+            - name: search_cve
+               description: "Search CVE database by keyword and return recent CVEs."
+               parameters:
+                  keyword:
+                     type: string
+                     description: "Search term, e.g. 'sql injection'"
+                     required: true
+            - name: dns_lookup
+               description: "Resolve DNS records for a hostname."
+               parameters:
+                  hostname:
+                     type: string
+                     description: "Domain to resolve"
+                     required: true
+```
+
+Notes
+- APIGen doesn’t require MCP specifically; our implementation uses Strands-first prompts and best-effort execution via `strands_tools` if installed. Without it, you’ll still see tool_calls in assistant messages but no tool messages.
+- We parse OpenAI-style function calls or a flat schema; see `ToolCall` in `src/agentic_datasets/schemas/messages.py`.
+- For true MCP-backed tools, you can integrate an MCP tool server with Strands; this repo keeps it simple by using community tools.
+
+### Tool execution backends
+
+- Default backend order is `strands` then `local` (deterministic stubs) so we prefer real `strands_tools` when available.
+- Override with env:
+
+```zsh
+export AGENTIC_TOOLS_BACKENDS=strands,local   # default
+# or strictly strands only (fail if not found):
+export AGENTIC_TOOLS_BACKENDS=strands
+# or local first for offline demos:
+export AGENTIC_TOOLS_BACKENDS=local,strands
+```
+
+- Tool messages include `tool_output.backend` so you can see which backend executed.
+
+
 ## CI/CD (summary)
 
 - Hosted smoke checks: .github/workflows/smoke_hosted.yml

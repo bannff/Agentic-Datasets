@@ -24,17 +24,22 @@ class APIGenMTConfig:
         temperature: float = 0.2,
         enabled: bool = True,
         tools: Optional[List[Dict[str, Any]]] = None,
+        synthesize_on_fallback: bool = False,
     ) -> None:
         self.provider = provider
         self.model_name = model_name or ("qwen3:8b" if provider == "ollama" else None)
         self.temperature = max(0.0, min(1.0, temperature))
         self.enabled = enabled
         self.tools = tools or []
+        # When no agent/model available, optionally synthesize one assistant tool_call
+        # so downstream tool execution/injection can be tested deterministically.
+        self.synthesize_on_fallback = synthesize_on_fallback
 
 
 def apigenmt(
     records: Iterable[ConversationRecord],
     config: Optional[APIGenMTConfig | dict] = None,
+    **kwargs: Any,
 ) -> Iterator[ConversationRecord]:
     """APIGenMT stage: inject tool calls into conversations using Strands-first path.
 
@@ -42,13 +47,30 @@ def apigenmt(
     - Parse assistant messages with tool_calls and append corresponding tool messages
     - Fallback: set metadata flag if agent/model not available
     """
-    # Coerce config
-    if config is None:
-        cfg = APIGenMTConfig()
+    # Coerce config. Support both nested `config: {...}` and top-level params like `tools:` in YAML.
+    if config is None and kwargs:
+        # Treat top-level kwargs as config fields (e.g., tools, provider, model_name)
+        cfg = APIGenMTConfig(**kwargs)
     elif isinstance(config, dict):
-        cfg = APIGenMTConfig(**config)
+        # Merge explicit config dict with any kwargs overrides if present
+        merged: Dict[str, Any] = {**config, **kwargs}
+        cfg = APIGenMTConfig(**merged)
+    elif config is None:
+        # No config provided at all; use defaults
+        cfg = APIGenMTConfig()
     else:
-        cfg = config
+        # Already an APIGenMTConfig instance; allow kwargs to override common fields
+        if kwargs:
+            # Reconstruct applying overrides to keep immutability semantics simple
+            cfg = APIGenMTConfig(
+                provider=kwargs.get("provider", config.provider),
+                model_name=kwargs.get("model_name", config.model_name),
+                temperature=kwargs.get("temperature", config.temperature),
+                enabled=kwargs.get("enabled", config.enabled),
+                tools=kwargs.get("tools", config.tools),
+            )
+        else:
+            cfg = config
 
     if not cfg.enabled:
         yield from records
@@ -114,8 +136,52 @@ def apigenmt(
                 logger.debug(f"Failed to parse tool_call {raw}: {e}")
         return out
 
+    def _synthesize_tool_call_record(rec: ConversationRecord) -> ConversationRecord:
+        tool = cfg.tools[0] or {}
+        name = tool.get("name") or "tool"
+        params = tool.get("parameters") or {}
+        args: Dict[str, Any] = {}
+        for k, spec in params.items():
+            t = (spec or {}).get("type")
+            if t == "string":
+                if k.lower() in ("keyword", "query"):
+                    last_user = next((m.content for m in reversed(rec.messages) if m.role == "user"), "example")
+                    args[k] = (last_user.split()[:2] or ["example"])[:1][0]
+                elif k.lower() in ("hostname", "domain"):
+                    args[k] = "example.com"
+                else:
+                    args[k] = "example"
+            else:
+                args[k] = None
+        tool_call = ToolCall(id="tc1", name=name, arguments=args, status="requested")
+        # Attach to last assistant if present to avoid consecutive assistant messages
+        new_messages = list(rec.messages)
+        if new_messages and new_messages[-1].role == "assistant":
+            last = new_messages[-1]
+            existing = list(last.tool_calls or [])
+            existing.append(tool_call)
+            # Replace last message with updated tool_calls
+            new_messages[-1] = Message(
+                role=last.role,
+                content=last.content or "[Invoking tool]",
+                metadata=last.metadata,
+                tool_calls=existing,
+            )
+        else:
+            synth_msg = Message(role="assistant", content="[Invoking tool]", tool_calls=[tool_call])
+            new_messages.append(synth_msg)
+        meta = {**(rec.metadata or {}), "stage": "apigenmt", "agentic": True, "via": "fallback-synth"}
+        return ConversationRecord(messages=new_messages, metadata=meta, source=rec.source, id=rec.id)
+
     for rec in records:
         if strands_agent is None:
+            # Fallback path: optionally synthesize a tool_call to enable tool execution tests
+            if cfg.synthesize_on_fallback and cfg.tools:
+                try:
+                    yield _synthesize_tool_call_record(rec)
+                    continue
+                except Exception as e:
+                    logger.debug(f"APIGenMT synthesize_on_fallback failed: {e}")
             # Metadata-only fallback
             meta = {**(rec.metadata or {}), "stage": "apigenmt", "agentic": True, "via": "fallback"}
             yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
@@ -178,5 +244,11 @@ def apigenmt(
             )
         except Exception as e:
             logger.warning(f"APIGenMT agent failed for {rec.id}: {e}. Using fallback metadata.")
+            if cfg.synthesize_on_fallback and cfg.tools:
+                try:
+                    yield _synthesize_tool_call_record(rec)
+                    continue
+                except Exception as se:
+                    logger.debug(f"APIGenMT synthesize_on_fallback (error path) failed: {se}")
             meta = {**(rec.metadata or {}), "stage": "apigenmt", "agentic": True, "via": "fallback"}
             yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)

@@ -1,0 +1,33 @@
+input: archive/legacy/PyScience/cybersec_data/train.jsonl
+output: examples/out.legacy_cybersec.jsonl
+max_records: 50
+orchestrator: strands
+stages:
+- name: agentinstruct
+  params:
+    k_variants: 2
+- name: s2m
+  params:
+    config:
+      provider: ollama
+      model_name: qwen3:8b
+      temperature: 0.3
+- name: apigenmt
+  params:
+    tools:
+    - name: search_cve
+      description: Search CVE database by keyword and return recent CVEs.
+      parameters:
+        keyword:
+          type: string
+          description: Search term, e.g. 'buffer overflow'
+          required: true
+    - name: dns_lookup
+      description: Resolve DNS records for a hostname.
+      parameters:
+        hostname:
+          type: string
+          description: Domain to resolve
+          required: true
+    synthesize_on_fallback: true
+- name: reviewinstruct

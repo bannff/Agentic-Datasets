@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Union
 from collections.abc import Iterable, Iterator
 import importlib
+import os
 
 from ..schemas.messages import ConversationRecord, Message, ToolCall
 
@@ -23,26 +24,44 @@ def run_strands_pipeline(
     from ..registry import registry
 
     def _maybe_exec_tool(tool_call: ToolCall) -> Message | None:
-        """Try to execute a tool_call using strands-tools if available.
+        """Try to execute a tool_call using configured backends.
 
-        Returns a tool message on success; None on failure/unavailable.
+    Backend order is controlled by env AGENTIC_TOOLS_BACKENDS (comma-separated),
+    defaulting to "strands" (strict). Returns a tool message on success; None if no backend resolves.
         """
-        tool_fn = None
-        # First try top-level export (e.g., from strands_tools import file_read)
-        try:
-            st = importlib.import_module("strands_tools")
-            tool_fn = getattr(st, tool_call.name)
-        except Exception:
-            tool_fn = None
+        backend_order = [
+            b.strip()
+            for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands").lower().split(",")
+            if b.strip()
+        ]
 
-        # Next, try submodule with same name (e.g., strands_tools.browser)
-        if tool_fn is None:
-            try:
-                mod = importlib.import_module(f"strands_tools.{tool_call.name}")
-                tool_fn = getattr(mod, tool_call.name, None)
-            except Exception:
-                tool_fn = None
+        def _resolve_fn(name: str) -> tuple[Any | None, str | None]:
+            for backend in backend_order:
+                if backend == "strands":
+                    # Try community tools top-level first, then submodule
+                    try:
+                        st = importlib.import_module("strands_tools")
+                        fn = getattr(st, name)
+                        return fn, "strands_tools"
+                    except Exception:
+                        pass
+                    try:
+                        mod = importlib.import_module(f"strands_tools.{name}")
+                        fn = getattr(mod, name, None)
+                        if fn:
+                            return fn, "strands_tools"
+                    except Exception:
+                        pass
+                elif backend == "local":
+                    try:
+                        lt = importlib.import_module("agentic_datasets.local_tools")
+                        fn = getattr(lt, name)
+                        return fn, "local_tools"
+                    except Exception:
+                        pass
+            return None, None
 
+        tool_fn, backend_used = _resolve_fn(tool_call.name)
         if tool_fn is None:
             return None
 
@@ -53,14 +72,18 @@ def run_strands_pipeline(
         }
         try:
             result = tool_fn(tool_input)
-            # Expect dict with content list of {text: ...}
-            output_text = "\n".join([c.get("text", "") for c in result.get("content", [])])
+            # Annotate backend in the tool output for transparency
+            if isinstance(result, dict):
+                result = {**result, "backend": backend_used or "unknown", "ok": True}
+            output_text = "\n".join(
+                [c.get("text", "") for c in (result.get("content", []) if isinstance(result, dict) else [])]
+            )
             return Message(
                 role="tool",
                 content=output_text or "",
                 tool_name=tool_call.name,
                 tool_call_id=tool_call.id,
-                tool_output=result,
+                tool_output=result if isinstance(result, dict) else {"backend": backend_used or "unknown", "content": [], "raw": str(result), "ok": True},
             )
         except Exception as e:
             return Message(
@@ -68,7 +91,7 @@ def run_strands_pipeline(
                 content=f"tool {tool_call.name} failed: {e}",
                 tool_name=tool_call.name,
                 tool_call_id=tool_call.id,
-                tool_output={"status": "error", "error": str(e)},
+                tool_output={"status": "error", "error": str(e), "backend": backend_used or "unknown", "ok": False},
             )
 
     def _inject_tool_messages(stream: Iterable[ConversationRecord]) -> Iterator[ConversationRecord]:

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable, Iterator, List
+from typing import Iterable, Iterator, List, Optional
 
 from .config import PipelineConfig
-from .schemas.messages import ConversationRecord
+from .schemas.messages import ConversationRecord, Message
 
 
 def _iter_jsonl(path: Path) -> Iterator[dict]:
@@ -26,8 +26,102 @@ def ingest(input_path: Path) -> Iterator[dict]:
 
 
 def normalize(records: Iterable[dict]) -> Iterator[ConversationRecord]:
+    """Normalize raw dicts into ConversationRecord.
+
+    Accepts multiple legacy shapes in addition to the canonical schema:
+    - Canonical: {"messages": [{role, content, ...}], ...}
+    - Legacy text: {"text": "User: ...\nAssistant: ..."}
+    - Instruct style: {"instruction": str, "output": str}
+    - Prompt/completion: {"prompt": str, "completion": str}
+    - Q/A: {"question": str, "answer": str}
+    If only a single text field is available, it becomes a single user message; later stages can expand.
+    """
+
+    def _from_legacy_text(text: str) -> Optional[List[Message]]:
+        t = (text or "").strip()
+        if not t:
+            return None
+        # Try to split on role prefixes (case-insensitive)
+        lines = [ln.strip() for ln in t.splitlines() if ln.strip()]
+        cur_role: Optional[str] = None
+        buf: List[str] = []
+        messages: List[Message] = []
+
+        def flush() -> None:
+            nonlocal buf, cur_role, messages
+            if cur_role and buf:
+                content = "\n".join(buf).strip()
+                if content:
+                    role: str = cur_role.lower()
+                    if role not in ("system", "user", "assistant", "tool"):
+                        role = "user"
+                    messages.append(Message(role=role, content=content))
+                buf = []
+
+        for ln in lines:
+            lower = ln.lower()
+            if lower.startswith("user:"):
+                flush()
+                cur_role = "user"
+                buf = [ln.split(":", 1)[1].strip()]
+            elif lower.startswith("assistant:") or lower.startswith("assistant "):
+                flush()
+                cur_role = "assistant"
+                buf = [ln.split(":", 1)[1].strip() if ":" in ln else ln]
+            elif lower.startswith("system:"):
+                flush()
+                cur_role = "system"
+                buf = [ln.split(":", 1)[1].strip()]
+            elif lower.startswith("tool:"):
+                flush()
+                cur_role = "tool"
+                buf = [ln.split(":", 1)[1].strip()]
+            else:
+                # Continuation of current role block or start as user if none
+                if cur_role is None:
+                    cur_role = "user"
+                buf.append(ln)
+        flush()
+
+        if not messages:
+            # Fall back to a single user message
+            return [Message(role="user", content=t)]
+        return messages
+
     for r in records:
-        yield ConversationRecord.model_validate(r)
+        if isinstance(r, dict) and "messages" in r:
+            yield ConversationRecord.model_validate(r)
+            continue
+
+        # Try various legacy shapes
+        msgs: Optional[List[Message]] = None
+        if isinstance(r, dict):
+            if isinstance(r.get("text"), str):
+                msgs = _from_legacy_text(r.get("text", ""))
+            elif isinstance(r.get("instruction"), str) and isinstance(r.get("output"), str):
+                msgs = [
+                    Message(role="user", content=str(r["instruction"]).strip()),
+                    Message(role="assistant", content=str(r["output"]).strip()),
+                ]
+            elif isinstance(r.get("prompt"), str) and isinstance(r.get("completion"), str):
+                msgs = [
+                    Message(role="user", content=str(r["prompt"]).strip()),
+                    Message(role="assistant", content=str(r["completion"]).strip()),
+                ]
+            elif isinstance(r.get("question"), str) and isinstance(r.get("answer"), str):
+                msgs = [
+                    Message(role="user", content=str(r["question"]).strip()),
+                    Message(role="assistant", content=str(r["answer"]).strip()),
+                ]
+
+        if msgs:
+            rid = r.get("id") if isinstance(r, dict) else None
+            src = r.get("source") if isinstance(r, dict) else None
+            meta = r.get("metadata") if isinstance(r, dict) else None
+            yield ConversationRecord(messages=msgs, id=rid, source=src, metadata=meta)
+        else:
+            # Last resort: attempt direct validation (will raise on bad inputs to surface issues)
+            yield ConversationRecord.model_validate(r)
 
 
 def validate(records: Iterable[ConversationRecord]) -> List[ConversationRecord]:
