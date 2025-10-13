@@ -51,6 +51,8 @@ All stages are wired Strands-first with tested fallbacks. Schemas are strict (Py
 - agentic-datasets transforms: List registered transforms
 - agentic-datasets catalog:list/show: Inspect dataset catalog
 - agentic-datasets hf:push: Push JSONL to Hugging Face with dataset card
+- agentic-datasets metrics: Summarize tool_calls, tool messages, backends, via
+- agentic-datasets doctor: Check Strands/Ollama/tools environment readiness
 
 Examples in repo:
 - examples/pipeline.example.yaml
@@ -70,19 +72,48 @@ stages:
          tools:
             - name: search_cve
                description: "Search CVE database by keyword and return recent CVEs."
+
+      ### Robust parsing and turn alternation
+
+      - APIGenMT is hardened to extract a top-level JSON array even when the model wraps it with prose.
+      - It tolerates `function`-style and flat tool_call formats and safely parses stringified `arguments`.
+      - It merges consecutive user/assistant turns to satisfy schema alternation rules, reducing validation failures on noisy model outputs.
                parameters:
                   keyword:
                      type: string
-                     description: "Search term, e.g. 'sql injection'"
-                     required: true
+      - Default backend order is `strands` then `local` (deterministic stubs) so we prefer real `strands_tools` when available.
+      - The orchestrator always appends `local` as a last-resort fallback for deterministic demos/tests.
+      - Reorder with env (note: `local` remains a final fallback):
             - name: dns_lookup
                description: "Resolve DNS records for a hostname."
                parameters:
-                  hostname:
-                     type: string
+      # or local first for offline demos:
+      export AGENTIC_TOOLS_BACKENDS=local,strands
                      description: "Domain to resolve"
                      required: true
 ```
+
+      ## Metrics and diagnostics
+
+      - Summarize an output JSONL:
+
+         - `agentic-datasets metrics path/to/out.jsonl`
+
+         Example output (truncated):
+
+         ```json
+         {
+            "records": 50,
+            "assistant_tool_calls": 12,
+            "tool_messages": 74,
+            "backend_counts": { "local_tools": 24 },
+            "via_counts": { "strands": 13, "fallback": 37 }
+         }
+         ```
+
+      - Environment doctor:
+
+         - `agentic-datasets doctor` → prints OLLAMA_HOST, AGENTIC_TOOLS_BACKENDS, Strands/Ollama importability, and tool backend resolution.
 
 Notes
 - APIGen doesn’t require MCP specifically; our implementation uses Strands-first prompts and best-effort execution via `strands_tools` if installed. Without it, you’ll still see tool_calls in assistant messages but no tool messages.
