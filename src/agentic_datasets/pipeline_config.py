@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, Callable, cast
+import logging
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
 
-from .pipeline import ingest, normalize, export
+from .pipeline import ingest, normalize, export  # type: ignore[import-untyped]
 from .registry import registry
 from .schemas.messages import ConversationRecord
+
+# Type aliases for clarity
+IngestFunc = Callable[[Path], Iterator[Dict[str, Any]]]
+NormalizeFunc = Callable[[Any], Iterator[ConversationRecord]]  # Accepts Iterable[dict]
+
+logger = logging.getLogger(__name__)
 
 
 class StageConfig(BaseModel):
@@ -23,15 +30,15 @@ class PipelineSpec(BaseModel):
     orchestrator: Optional[str] = Field(
         default=None, description="Optional orchestrator backend: 'strands' or None for local"
     )
-    stages: List[StageConfig] = Field(default_factory=list)
+    stages: List[StageConfig] = Field(default_factory=list)  # type: ignore[assignment]
 
     @field_validator("stages", mode="before")
     @classmethod
-    def _coerce_stages(cls, v: Any) -> Any:
+    def _coerce_stages(cls, v: Any) -> list[StageConfig]:  # type: ignore[name-defined]
         # Allow list of dicts in YAML to become List[StageConfig]
         if isinstance(v, list) and v and isinstance(v[0], dict):
-            return [StageConfig.model_validate(i) for i in v]
-        return v
+            return [StageConfig.model_validate(stage_dict) for stage_dict in (v or [])]  # type: ignore
+        return cast(list[StageConfig], v if isinstance(v, list) else [])  # type: ignore
 
 
 def load_spec(path: Path) -> PipelineSpec:
@@ -40,30 +47,68 @@ def load_spec(path: Path) -> PipelineSpec:
 
 
 def run_spec(spec: PipelineSpec) -> Path:
-    records: Iterator[Dict[str, Any]] = ingest(spec.input)
-    stream: Iterator[ConversationRecord] = normalize(records)
-    # Normalize stages to StageConfig for static typing downstream
-    stages: List[StageConfig] = [
-        s if isinstance(s, StageConfig) else StageConfig.model_validate(s) for s in spec.stages
-    ]
-    # Orchestrate stages
+    """Run pipeline stages, saving intermediate outputs to audit trail.
+    
+    Args:
+        spec: PipelineSpec with input, output, and stages
+        
+    Returns:
+        Path to final output file
+    """
+    # Create stage outputs directory
+    output_dir = Path(spec.output).parent
+    stages_audit_dir = output_dir / ".pipeline_stages"
+    stages_audit_dir.mkdir(parents=True, exist_ok=True)
+    
+    logger.info(f"Pipeline audit trail: {stages_audit_dir}")
+    
+    # Load and normalize input
+    records: Iterator[Dict[str, Any]] = ingest(spec.input)  # type: ignore[assignment]
+    stream: Iterator[ConversationRecord] = normalize(records)  # type: ignore[arg-type]
+    
+    # Ensure stages are properly typed
+    stages: List[StageConfig] = spec.stages  # type: ignore
+    
+    # Process through stages with intermediate checkpoints
     if spec.orchestrator == "strands":
         from .orchestrators.strands import run_strands_pipeline
 
         stream = run_strands_pipeline([s.model_dump() for s in stages], stream)
     else:
-        # Local in-process registry
-        for st in stages:
+        # Local in-process registry with intermediate outputs
+        for stage_idx, st in enumerate(stages, 1):
             transform = registry.get(st.name)
             stream = transform(stream, **st.params)
-    # Truncate if needed
+            
+            # Save intermediate output (create new list from stream to avoid consuming iterator)
+            stage_output_path = stages_audit_dir / f"{stage_idx:02d}_{st.name}.jsonl"
+            items: List[ConversationRecord] = []
+            for rec in stream:  # type: ignore
+                items.append(rec)
+                
+            # Export intermediate checkpoint
+            export(items, stage_output_path)
+            logger.info(f"Stage {stage_idx} ({st.name}): {len(items)} records → {stage_output_path}")
+            
+            # Convert back to iterator for next stage (or final output)
+            stream = iter(items)
+    
+    # Truncate if needed and save final output
     if spec.max_records is not None:
-        items: List[ConversationRecord] = []
+        items_final: List[ConversationRecord] = []
         for i, rec in enumerate(stream):
             if i >= spec.max_records:
                 break
-            items.append(rec)
-        export(items, spec.output)
+            items_final.append(rec)
+        export(items_final, spec.output)
+        logger.info(f"Final output (truncated to {spec.max_records}): {spec.output}")
     else:
-        export(stream, spec.output)
+        # Stream has been fully consumed in stages above, items holds final data
+        if not isinstance(stream, list):
+            items_final = list(stream)
+        else:
+            items_final = stream  # type: ignore
+        export(items_final, spec.output)
+        logger.info(f"Final output: {len(items_final)} records → {spec.output}")
+    
     return spec.output

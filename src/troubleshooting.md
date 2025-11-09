@@ -1,61 +1,146 @@
-[{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/src/agentic_datasets/pipeline_config.py",
-	"owner": "pylance",
-	"code": {
-		"value": "reportAttributeAccessIssue",
-		"target": {
-			"$mid": 1,
-			"path": "/microsoft/pylance-release/blob/main/docs/diagnostics/reportAttributeAccessIssue.md",
-			"scheme": "https",
-			"authority": "github.com"
-		}
-	},
-	"severity": 8,
-	"message": "Cannot access attribute \"model_dump\" for class \"Dict[str, Any]\"\n  Attribute \"model_dump\" is unknown",
-	"source": "Pylance",
-	"startLineNumber": 50,
-	"startColumn": 16,
-	"endLineNumber": 50,
-	"endColumn": 26,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/src/agentic_datasets/pipeline_config.py",
-	"owner": "pylance",
-	"code": {
-		"value": "reportAttributeAccessIssue",
-		"target": {
-			"$mid": 1,
-			"path": "/microsoft/pylance-release/blob/main/docs/diagnostics/reportAttributeAccessIssue.md",
-			"scheme": "https",
-			"authority": "github.com"
-		}
-	},
-	"severity": 8,
-	"message": "Cannot access attribute \"name\" for class \"Dict[str, Any]\"\n  Attribute \"name\" is unknown",
-	"source": "Pylance",
-	"startLineNumber": 55,
-	"startColumn": 41,
-	"endLineNumber": 55,
-	"endColumn": 45,
-	"origin": "extHost1"
-},{
-	"resource": "/Users/danielrodrigo/Workspace/datasets/src/agentic_datasets/pipeline_config.py",
-	"owner": "pylance",
-	"code": {
-		"value": "reportAttributeAccessIssue",
-		"target": {
-			"$mid": 1,
-			"path": "/microsoft/pylance-release/blob/main/docs/diagnostics/reportAttributeAccessIssue.md",
-			"scheme": "https",
-			"authority": "github.com"
-		}
-	},
-	"severity": 8,
-	"message": "Cannot access attribute \"params\" for class \"Dict[str, Any]\"\n  Attribute \"params\" is unknown",
-	"source": "Pylance",
-	"startLineNumber": 56,
-	"startColumn": 45,
-	"endLineNumber": 56,
-	"endColumn": 51,
-	"origin": "extHost1"
-}]
+➜  datasets git:(main) ✗ rm -f "/Volumes/Crucial X9/data-sets/heimdall/processed/.pipeline_stages/01_apigenmt.jsonl" "
+/Volumes/Crucial X9/data-sets/heimdall/processed/heimdall-enhanced.jsonl"
+➜  datasets git:(main) ✗ /Users/danielrodrigo/Workspace/.venv/bin/python << 'EOF'
+heredoc> import json
+heredoc> from pathlib import Path
+heredoc> import sys
+heredoc> sys.path.insert(0, '/Users/danielrodrigo/Workspace/datasets/src')
+heredoc> 
+heredoc> from agentic_datasets.stages.apigenmt import apigenmt
+heredoc> from agentic_datasets.pipeline import ingest, normalize
+heredoc> 
+heredoc> # Get just first 10 records from S2M output
+heredoc> s2m_path = Path('/Volumes/Crucial X9/data-sets/heimdall/processed/.pipeline_stages/02_s2m.jsonl')
+heredoc> 
+heredoc> # Read 10 records
+heredoc> records = []
+heredoc> with open(s2m_path) as f:
+heredoc>     for i, line in enumerate(f):
+heredoc>         if i >= 10:
+heredoc>             break
+heredoc>         rec = json.loads(line)
+heredoc>         records.append(rec)
+heredoc> 
+heredoc> print(f"Testing APIGenMT on {len(records)} sample records...")
+heredoc> 
+heredoc> # Process through APIGenMT with proper config
+heredoc> config = {
+heredoc>     "provider": "ollama",
+heredoc>     "model_name": "qwen3:8b",
+heredoc>     "tools": [
+heredoc>         {
+heredoc>             "name": "search_cve",
+heredoc>             "description": "Search CVE database",
+heredoc>             "parameters": {
+heredoc>                 "keyword": {
+heredoc>                     "type": "string",
+heredoc>                     "description": "Search term"
+heredoc>                 }
+heredoc>             }
+heredoc>         },
+heredoc>         {
+heredoc>             "name": "dns_lookup",
+heredoc>             "description": "Perform DNS lookup",
+heredoc>             "parameters": {
+heredoc>                 "hostname": {
+heredoc>                     "type": "string",
+heredoc>                     "description": "Hostname to lookup"
+heredoc>                 }
+heredoc>             }
+heredoc>         }
+heredoc>     ]
+heredoc> }
+heredoc> 
+heredoc> # Convert dicts to ConversationRecord objects
+heredoc> from agentic_datasets.schemas.messages import ConversationRecord
+heredoc> conv_records = []
+heredoc> for r in records:
+heredoc>     conv_records.append(ConversationRecord.model_validate(r))
+heredoc> 
+heredoc> # Process
+heredoc> results = list(apigenmt(conv_records, config=config))
+heredoc> 
+heredoc> # Count tool calls
+heredoc> total_tool_calls = 0
+heredoc> records_with_tools = 0
+heredoc> for rec in results:
+heredoc>     tool_calls_in_rec = 0
+heredoc>     for msg in rec.messages:
+heredoc>         if msg.tool_calls:
+heredoc>             tool_calls_in_rec += len(msg.tool_calls)
+heredoc>     if tool_calls_in_rec > 0:
+heredoc>         records_with_tools += 1
+heredoc>         total_tool_calls += tool_calls_in_rec
+heredoc> 
+heredoc> print(f"Results:")
+heredoc> print(f"  Records with tool calls: {records_with_tools}/{len(records)}")
+heredoc> print(f"  Total tool calls: {total_tool_calls}")
+heredoc> print(f"  First record tool calls: {results[0].messages[2].tool_calls if len(results[0].messages) > 2 and res
+ults[0].messages[2].tool_calls else 'None'}")
+heredoc> 
+heredoc> EOF
+Testing APIGenMT on 10 sample records...
+/Users/danielrodrigo/Workspace/.venv/lib/python3.12/site-packages/strands/agent/agent.py:473: UserWarning: `**kwargs` parameter is deprecating, use `invocation_state` instead.
+  async for event in events:
+[
+  {"role": "user", "content": "How can hunters identify tampering with Apple’s Transparency, Consent, and Control (TCC) DB? Please include a small, practical example."},
+  {"role": "assistant", "content": "Apple's Transparency, Consent, and Control (TCC) database represents a critical security mechanism controlling application access to sensitive resources. TCC.db tampering detection requires sophisticated hunting methodologies aligned with NIST Cybersecurity Framework's Detect function and MITRE ATT&CK techniques T1547.006 (Boot or Logon Autostart Execution: AppleScript) and T1548.002 (Abuse Elevation Control Mechanism: Bypass User Account Control).\n\n**Database Integrity Verification:**\nHunters should implement cryptographic hashing mechanisms to establish baseline TCC.db signatures using SHA-256 or SHA-3 algorithms. Regular integrity checks comparing current hashes against known-good baselines can identify unauthorized modifications. This aligns with NIST CSF DE.CM-1 (Detection Processes) requirements for continuous monitoring. **To identify known vulnerabilities in TCC.db handling, we can check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "TCC db"}}}]},
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'Improper validation of TCC.db permissions in macOS 14.0 allows privilege escalation via crafted applications.', 'cvss_score': '8.2'}, {'id': 'CVE-2022-5678', 'summary': 'Race condition in TCC.db writing could enable unauthorized access to user permissions.', 'cvss_score': '7.5'}]}"},
+  {"role": "assistant", "content": "**File System Monitoring:**\nDeploy endpoint detection solutions monitoring TCC.db file access patterns, focusing on:\n- Unusual read/write operations outside standard macOS processes\n- Modifications occurring during suspicious process execution contexts\n- Database size anomalies indicating potential manipulation\n- File ownership changes or permission modifications\n\n**Process Behavior Analysis:**\nCorrelate TCC.db changes with process genealogy using techniques detecting MITRE ATT&CK T1055 (Process Injection). Monitor for:\n- Applications requesting permissions beyond their declared capabilities\n- Privilege escalation attempts targeting T. CC services\n- Suspicious inter-process communication patterns involving authorization services\n\n**Registry and System Call Monitoring:**\nImplement kernel-level monitoring capturing system calls accessing TCC mechanisms. Focus on:\n- Authorization service API abuse\n- Direct database access through undocumented interfaces\n- Manipulation of com.apple.quarantine extended attributes\n\n**Behavioral Analytics:**\nEstablish baseline user behavior patterns regarding application permissions, detecting deviations indicating potential compromise. Monitor for applications accessing resources inconsistent with their functional scope or user interaction patterns.\n\n**Forensic Indicators:**\nExamine TCC.db metadata including modification timestamps, access patterns, and database transaction logs. Analyze SQLite journal files for incomplete transactions suggesting manipulation attempts.\n\nEffective TCC.db tampering detection requires multi-layered approaches combining technical controls with behavioral analysis, ensuring comprehensive coverage against sophisticated adversaries targeting macOS authorization mechanisms while maintaining operational efficiency within enterprise environments. **To further contextualize risks, we can check for broader macOS authorization service vulnerabilities:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "macOS authorization"}}}]},
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-9876', 'summary': 'Information disclosure in macOS authorization service could expose TCC.db structure to attackers.', 'cvss_score': '6.8'}, {'id': 'CVE-2021-0987', 'summary': 'Bypass of macOS authorization checks via kernel extensions.', 'cvss_score': '9.1'}]}"},
+  {"role": "assistant", "content": "These CVEs highlight the need for layered detection strategies, including real-time monitoring, anomaly detection, and regular integrity checks to mitigate risks associated with TCC.db tampering."}
+][
+  {"role": "user", "content": "How can hunters identify tampering with Apple’s Transparency, Consent, and Control (TCC) DB? Provide step-by-step guidance and common pitfalls."},
+  {"role": "assistant", "content": "Apple's Transparency, Consent, and Control (TCC) database represents a critical security mechanism controlling application access to sensitive resources. TCC.db tampering detection requires sophisticated hunting methodologies aligned with NIST Cybersecurity Framework's Detect function and MITRE ATT&CK techniques T1547.006 (Boot or Logon Autostart Execution: AppleScript) and T1548.002 (Abuse Elevation Control Mechanism: Bypass User Account Control).\n\n**Database Integrity Verification:**\nHunters should implement cryptographic hashing mechanisms to establish baseline TCC.db signatures using SHA-256 or SHA-3 algorithms. Regular integrity checks comparing current hashes against known-good baselines can identify unauthorized modifications. This aligns with NIST CSF DE.CM-1 (Detection Processes) requirements for continuous monitoring. **To identify known vulnerabilities in TCC.db handling, we can check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "TCC db"}}}]},
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'Improper validation of TCC.db permissions in macOS 14.0 allows privilege escalation via crafted applications.', 'cvss_score': '8.2'}, {'id': 'CVE-2022-5678', 'summary': 'Race condition in TCC.db writing could enable unauthorized access to user permissions.', 'cvss_score': '7.5'}]}"},
+  {"role": "assistant", "content": "**File System Monitoring:**\nDeploy endpoint detection solutions monitoring TCC.db file access patterns, focusing on:\n- Unusual read/write operations outside standard macOS processes\n- Modifications occurring during suspicious process execution contexts\n- Database size anomalies indicating potential manipulation\n- File ownership changes or permission modifications\n\n**Process Behavior Analysis:**\nCorrelate TCC.db changes with process genealogy using techniques detecting MITRE ATT&CK T1055 (Process Injection). Monitor for:\n- Applications requesting permissions beyond their declared capabilities\n- Privilege escalation attempts targeting TCC services\n- Suspicious inter-process communication patterns involving authorization services\n\n**Registry and System Call Monitoring:**\nImplement kernel-level monitoring capturing system calls accessing TCC mechanisms. Focus on:\n- Authorization service API abuse\n- Direct database access through undocumented interfaces\n- Manipulation of com.apple.quarantine extended attributes\n\n**Behavioral Analytics:**\nEstablish baseline user behavior patterns regarding application permissions, detecting deviations indicating potential compromise. Monitor for applications accessing resources inconsistent with their functional scope or user interaction patterns.\n\n**Forensic Indicators:**\nExamine TCC.db metadata including modification timestamps, access patterns, and database transaction logs. Analyze SQLite journal files for incomplete transactions suggesting manipulation attempts.\n\nEffective TCC.db tampering detection requires multi-layered approaches combining technical controls with behavioral analysis, ensuring comprehensive coverage against sophisticated adversaries targeting macOS authorization mechanisms while maintaining operational efficiency within enterprise environments. **To further contextualize risks, we can check for broader macOS authorization service vulnerabilities:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "macOS authorization"}}}]},
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-9876', 'summary': 'Information disclosure in macOS authorization service could expose TCC.db structure to attackers.', 'cvss_score': '6.8'}, {'id': 'CVE-2021-0987', 'summary': 'Bypass of macOS authorization checks via kernel extensions.', 'cvss_score': '9.1'}]}"},
+  {"role": "assistant", "content": "These CVEs highlight the need for layered detection strategies, including real-time monitoring, anomaly detection, and regular integrity checks to mitigate risks associated with TCC.db tampering. **Common pitfalls to avoid:**\n- Relying solely on hash-based checks without behavioral analysis\n- Ignoring process execution contexts during file access monitoring\n- Failing to correlate TCC.db changes with system call patterns\n- Overlooking SQLite journal files for forensic evidence\n- Not validating permissions against declared application capabilities\n\nBy integrating these techniques with threat intelligence from CVE databases, hunters can build robust detection capabilities while minimizing false positives through contextual correlation."}
+][
+  {"role": "user", "content": "How can hunters identify tampering with Apple’s Transparency, Consent, and Control (TCC) DB? Summarize the key points concisely in bullet points."},  
+  {"role": "assistant", "content": "Apple's TCC.db tampering detection requires methods aligned with NIST CSF and MITRE ATT&CK. Here are key points:\n\n- **Hash-based integrity checks** (SHA-256/SHA-3) for baseline TCC.db signatures.\n- **File system monitoring** for unusual access patterns or ownership changes.\n- **Process behavior analysis** to detect privilege escalation attempts.\n- **Kernel-level system call monitoring** for unauthorized TCC service interactions.\n- **Behavioral analytics** to flag deviations from normal permission usage.\n- **Forensic analysis** of TCC.db metadata and SQLite journal files.\n\n**Common pitfalls:** Relying on single-layer detection, ignoring contextual execution contexts, or overlooking journal files.", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "TCC db"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'Improper TCC.db validation in macOS 14.0 allows privilege escalation.', 'cvss_score': '8.2'}, {'id': 'CVE-2022-5678', 'summary': 'Race condition in TCC.db writing enables unauthorized access.', 'cvss_score': '7.5'}]}"},  
+  {"role": "assistant", "content": "**To contextualize risks, check broader macOS authorization service vulnerabilities:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "macOS authorization"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-9876', 'summary': 'Information disclosure in macOS authorization service exposes TCC.db structure.', 'cvss_score': '6.8'}, {'id': 'CVE-2021-0987', 'summary': 'Kernel extensions bypass macOS authorization checks.', 'cvss_score': '9.1'}]}"},  
+  {"role": "assistant", "content": "These CVEs highlight the need for layered detection (hashing + behavioral analysis) and regular monitoring of TCC.db metadata and system calls to mitigate risks."}
+][
+  {"role": "user", "content": "How can hunters leverage cloud billing anomalies to discover cryptojacking campaigns? Please include a small, practical example."},  
+  {"role": "assistant", "content": "Cloud billing anomaly detection represents a sophisticated approach to identifying cryptojacking campaigns through financial telemetry analysis. This methodology aligns with NIST Cybersecurity Framework's Detect (DE) function, specifically DE.AE-3 (event data aggregation) and DE.CM-1 (network monitoring).\n\nCryptojacking operations generate distinctive billing patterns that deviate from baseline cloud infrastructure costs. Attackers typically deploy unauthorized virtual machines or containers executing cryptocurrency mining software, creating measurable anomalies in compute resource consumption, network bandwidth utilization, and storage allocation. These deviations manifest as unexpected spikes in monthly invoices or hourly billing cycles.\n\nMITRE ATT&CK framework identifies cryptojacking under T1496 (Resource Hijacking), where adversaries exploit cloud infrastructure for unauthorized computational tasks. The technique often follows initial access through T1078 (Valid Accounts) or T1190 (Exploit Public-Facing Application), followed by persistence mechanisms like T1543 (Create or Modify System Process).\n\nHunters can leverage billing anomaly detection through several methodologies:\n\n**Baseline Deviation Analysis**: Establish historical cost baselines using statistical modeling to identify outliers exceeding 20-30% variance from expected patterns. This approach requires correlation between billing data and infrastructure metrics.\n\n**Resource Utilization Correlation**: Cross-reference billing anomalies with cloud control plane logs, examining CPU utilization patterns, memory consumption, and network egress volumes. Cryptojacking typically exhibits sustained high-CPU usage with minimal legitimate application interaction.\n\n**Geographic Distribution Analysis**: Examine billing sources across different regions or availability zones. Cryptocurrency mining operations often distribute across multiple geographic locations to avoid detection and optimize mining pool connectivity.\n\n**Temporal Pattern Recognition**: Analyze billing cycles for consistent patterns indicating automated cryptocurrency mining, such as sustained resource consumption during off-peak business hours.\n\nImplementation requires integration with cloud provider APIs (AWS Cost Explorer, Azure Cost Management, Google Cloud Billing Reports) combined with SIEM platforms capable of financial data correlation. Organizations should establish automated alerting thresholds and implement graduated response procedures for confirmed cryptojacking incidents, including immediate resource isolation and forensic preservation. **To identify known vulnerabilities in cloud billing systems that could enable cryptojacking, we can check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "cloud billing cryptojacking"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-4567', 'summary': 'Cloud provider billing APIs lack rate limiting, enabling cryptojacking via automated resource allocation.', 'cvss_score': '7.8'}, {'id': 'CVE-2022-8901', 'summary': 'Unauthorized access to billing records allows attackers to manipulate cost allocations for cryptojacking.', 'cvss_score': '8.5'}]}"},  
+  {"role": "assistant", "content": "**Practical Example**: A hunter notices a 300% spike in AWS spot instance costs for a development environment. Cross-referencing with CloudTrail logs reveals 500+ EC2 instances launched in 10 minutes, all configured with GPU passthrough for mining. DNS lookup of the associated mining pool domain shows ties to a known malicious infrastructure. **To validate DNS connections to mining pools, we can perform a DNS lookup on suspicious domains:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"MERCHANTABILITY": "dns_lookup", "arguments": {"hostname": "mining.pool.123456789.com"}}}]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'mining.pool.123456789.com: A record 192.0.2.1, associated with a known cryptojacking command-and-control server in a dark web forum.'}"},  
+  {"role": "assistant", "content": "These findings demonstrate how billing anomalies, when correlated with DNS and cloud logs, can expose cryptojacking campaigns. Hunters should prioritize automated billing analysis tools with real-time alerting and integrate DNS intelligence to trace malicious infrastructure."}
+][
+  {"role": "user", "content": "How can hunters leverage cloud billing anomalies to discover cryptojacking campaigns? Provide step-by-step guidance and common pitfalls."},  
+  {"role": "assistant", "content": "Cloud billing anomaly detection represents a sophisticated approach to identifying cryptojacking campaigns through financial telemetry analysis. This methodology aligns with NIST Cybersecurity Framework's Detect (DE) function, specifically DE.AE-3 (event data aggregation) and DE.CM-1 (network monitoring).\n\nCryptojacking operations generate distinctive billing patterns that deviate from baseline cloud infrastructure costs. Attackers typically deploy unauthorized virtual machines or containers executing cryptocurrency mining software, creating measurable anomalies in compute resource consumption, network bandwidth utilization, and storage allocation. These deviations manifest as unexpected spikes in monthly invoices or hourly billing cycles.\n\nMITRE ATT&CK framework identifies cryptojacking under T1496 (Resource Hijacking), where adversaries exploit cloud infrastructure for unauthorized computational tasks. The technique often follows initial access through T1078 (Valid Accounts) or T1190 (Exploit Public-Facing Application), followed by persistence mechanisms like T1543 (Create or Modify System Process).\n\nHunters can leverage billing anomaly detection through several methodologies:\n\n**Baseline Deviation Analysis**: Establish historical cost baselines using statistical modeling to identify outliers exceeding 20-30% variance from expected patterns. This approach requires correlation between billing data and infrastructure metrics.\n\n**Resource Utilization Correlation**: Cross-reference billing anomalies with cloud control plane logs, examining CPU utilization patterns, memory consumption, and network egress volumes. Cryptojacking typically exhibits sustained high-CPU usage with minimal legitimate application interaction.\n\n**Geographic Distribution Analysis**: Examine billing sources across different regions or availability zones. Cryptocurrency mining operations often distribute across multiple geographic locations to avoid detection and optimize mining pool connectivity.\n\n**Temporal Pattern Recognition**: Analyze billing cycles for consistent patterns indicating automated cryptocurrency mining, such as sustained resource consumption during off-peak business hours.\n\nImplementation requires integration with cloud provider APIs (AWS Cost Explorer, Azure Cost Management, Google Cloud Billing Reports) combined with SIEM platforms capable of financial data correlation. Organizations should establish automated alerting thresholds and implement graduated response procedures for confirmed cryptojacking incidents, including immediate resource isolation and forensic preservation. **To identify known vulnerabilities in cloud billing systems that could enable cryptojacking, we can check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "cloud billing cryptojacking"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-4567', 'summary': 'Cloud provider billing APIs lack rate limiting, enabling cryptojacking via automated resource allocation.', 'cvss_score': '7.8'}, {'id': 'CVE-2022-8901', 'summary': 'Unauthorized access to billing records allows attackers to manipulate cost allocations for cryptojacking.', 'cvss_score': '8.5'}]}"},  
+  {"role": "assistant", "content": "**Step-by-Step Example**: A hunter notices a 300% spike in AWS spot instance costs for a development environment. Cross-referencing with CloudTrail logs reveals 500+ EC2 instances launched in 10 minutes, all configured with GPU passthrough for mining. DNS lookup of the associated mining pool domain shows ties to a known malicious infrastructure. **To validate DNS connections to mining pools, we can perform a DNS lookup on suspicious domains:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "dns_lookup", "arguments": {"hostname": "mining.pool.123456789.com"}}}]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'mining.pool.123456789.com: A record 192.0.2.1, associated with a known cryptojacking command-and-control server in a dark web forum.'}"},  
+  {"role": "assistant", "content": "These findings demonstrate how billing anomalies, when correlated with DNS and cloud logs, can expose cryptojacking campaigns. Hunters should prioritize automated billing analysis tools with real-time alerting and integrate DNS intelligence to trace malicious infrastructure. **Common pitfalls to avoid:**\n- Ignoring correlation between billing data and infrastructure logs\n- Focusing solely on large anomalies while overlooking subtle patterns\n- Not validating DNS connections to mining pools\n- Failing to isolate compromised resources promptly\n- Underestimating the scale of automated cryptojacking operations"}  
+][
+  {"role": "user", "content": "How can hunters leverage cloud billing anomalies to discover cryptojacking campaigns? Summarize the key points concisely in bullet points."},  
+  {"role": "assistant", "content": "Cloud billing anomaly detection helps identify cryptojacking campaigns through financial telemetry analysis. Here are key points:\n\n- **Anomaly Indicators**: Sudden spikes in compute/storage costs, unexpected resource allocation patterns, and unexplained network egress.\n- **MITRE ATT&CK Alignment**: T1496 (Resource Hijacking) via T1078/T1190 (initial access) and T1543 (persistence).\n- **Detection Methods**: Baseline deviation analysis, resource utilization correlation, geographic distribution analysis, and temporal pattern recognition.\n- **Tools Required**: Cloud provider APIs (AWS Cost Explorer, Azure Cost Management) + SIEM for financial data correlation.\n- **Common Pitfalls**: Overlooking subtle anomalies, ignoring infrastructure-log correlations, and delayed resource isolation.\n\n**To identify vulnerabilities in cloud billing systems, check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "cloud billing cryptojacking"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-4567', 'summary': 'Cloud provider billing APIs lack rate limiting, enabling cryptojacking via automated resource allocation.', 'cvss_score': '7.8'}, {'id': 'CVE-2022-8901', 'summary': 'Unauthorized access to billing records allows attackers to manipulate cost allocations for cryptojacking.', 'cvss_score': '8.5'}]}"},  
+  {"role": "assistant", "content": "**Practical Example**: A 300% billing spike in AWS spot instances correlates with 500+ EC2 instances launched in 10 minutes. **To validate DNS connections to mining pools, perform a DNS lookup on suspicious domains:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "dns_lookup", "arguments": {"hostname": "mining.pool.123456789.com"}}}]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'mining.pool.123456789.com: A record 192.0.2.1, associated with a known cryptojacking command-and-control server in a dark web forum.'}"},  
+  {"role": "assistant", "content": "These CVEs and DNS results highlight the need for automated billing analysis, real-time alerting, and DNS intelligence integration to mitigate cryptojacking risks."}
+][
+  {"role": "user", "content": "How can hunters leverage DNS RPZ to disrupt known malware C2 domains? Please include a small, practical example."},  
+  {"role": "assistant", "content": "DNS Response Policy Zones (RPZ) enable security teams to disrupt adversarial C2 communications by overriding DNS resolution for malicious domains. This technique aligns with NIST Cybersecurity Framework's RS.AN-3 (response activities analysis) and RS.MI-3 (response mitigation), and mitigates MITRE ATT&CK T1071.004 (DNS-based C2). \n\n**Key Implementation Steps**: \n- Configure authoritative DNS servers to enforce RPZ rulesets containing known C2 domains or DGA patterns.\n- Return NXDOMAIN, sinkhole IPs, or TXT records with threat intelligence metadata for malicious queries.\n- Integrate with threat intelligence feeds for real-time rule updates.\n\n**Practical Example**: If a hunter identifies a C2 domain like `malicious-c2.example.com`, RPZ can block its resolution. **To validate this disruption, perform a DNS lookup on the domain:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "dns_lookup", "arguments": {"hostname": "malicious-c2.example.com"}}}]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'malicious-c2.example.com: NXDOMAIN - Resolution blocked by DNS RPZ policy (sinkhole IP: 192.0.2.1)'}"},  
+  {"role": "assistant", "content": "**To identify vulnerabilities in DNS infrastructure that could be exploited for C2 bypass, check for related CVEs:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "DNS RPZ"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'DNS server misconfiguration allows bypass of RPZ rules for DGA domains.', 'cvss_score': '7.2'}, {'id': 'CVE-2022-5678', 'summary': 'RPZ policy enforcement flaw enables C2 domain resolution in hybrid cloud environments.', 'cvss_score': '6.8'}]}"},  
+  {"role": "assistant", "content": "These findings highlight the importance of RPZ in disrupting C2, while also emphasizing the need for regular CVE checks to address potential bypasses. Hunters should combine RPZ with SIEM correlation to track blocked C2 attempts and refine threat intelligence feeds."}
+   {"role": "assistant", "content": "DNS Response Policy Zones (RPZ) enable security teams to disrupt adversarial C2 communications by overriding DNS resolution for malicious domains. This technique aligns with NIST Cybersecurity Framework's RS.AN-3 (response activities analysis) and RS.MI-3 (response mitigation), and mitigates MITRE ATT&CK T1071.004 (DNS-based C2). \n\n**Step-by-Step Implementation**: \n1. **Configure DNS servers**: Deploy RPZ on authoritative DNS servers or recursive resolvers to enforce policy rules.\n2. **Define rulesets**: Create rules containing known C2 domains, DGA patterns, or IoCs from threat intelligence feeds.\n3. **Specify response types**: Set RPZ to return NXDOMAIN, sinkhole IPs, or TXT records with threat metadata.\n4. **Integrate updates**: Automate rule refreshes using threat intelligence platforms for real-time coverage.\n5. **Monitor and log**: Track RPZ-triggered events in SIEM for correlation with broader attack patterns.\n\n**Practical Example**: If a hunter identifies a C2 domain like `malicious-c2.example.com`, RPZ can block its resolution. **To validate this disruption, perform a DNS lookup on the domain:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "dns_lookup", "arguments": {"hostname": "malicious-c2.example.com"}}}]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'malicious-c2.example.com: NXDOMAIN - Resolution blocked by DNS RPZ policy (sinkhole IP: 192.0.2.1)'}"},  
+  {"role": "assistant", "content": "**To identify vulnerabilities in DNS infrastructure that could be exploited for C2 bypass, check for related CVEs:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "DNS RPZ"}]]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'DNS server misconfiguration allows bypass of RPZ rules for DGA domains.', 'cvss_score': '7.2'}, {'id': 'CVE-2022-5678', 'summary': 'RPZ policy enforcement flaw enables C2 domain resolu
+  {"role": "assistant", "content": "These findings highlight the importance of RPZ in disrupting C2, while also emphasizing the need for regular CVE checks to address potential bypasses. **Common pitfalls to avoid:**\n- Over-reliance on RPZ without complementary network monitoring\n- Incorrect allowlist configurations causing legitimate service disruption\n- Lack of logging and forensic visibility into RPZ events\n- Static rulesets failing to adapt to evolving DGA patterns\n\nHunters should combine RPZ with SIEM correlation and dynamic threat intelligence feeds to maximize effectiveness while minimizing operational risks."}
+APIGenMT agent failed for heimdall-2::v2: Expecting ',' delimiter: line 5 column 278 (char 1924). Using fallback metadata.
+{"role": "user", "content": "How can hunters leverage DNS RPZ to disrupt known malware C2 domains? Summarize the key points concisely in bullet points."},  
+  {"role": "assistant", "content": "DNS RPZ disrupts C2 domains by overriding DNS resolution. Key points:\n\n- **Mechanism**: Manipulates DNS responses to block or redirect malicious domains (e.g., NXDOMAIN, sinkhole IPs).\n- **Alignment**: NIST RS.AN-3/RS.MI-3, MITRE ATT&CK T1071.004 (DNS-based C2).\n- **Implementation**: Configure authoritative DNS servers with rulesets containing IoCs, DGA patterns, or threat intelligence feeds.\n- **Response Types**: NXDOMAIN, A records to sinkholes, or TXT records with threat metadata.\n- **Integration**: Combine with SIEM for event correlation and real-time threat intelligence updates.\n- **Pitfalls**: Misconfigured allowlists, static rulesets, lack of logging, and reliance on RPZ alone.\n\n**To identify vulnerabilities in DNS RPZ implementations, check for related CVEs:**", "tool_calls": [{"id": "tool_1", "type": "function", "function": {"name": "search_cve", "arguments": {"keyword": "DNS RPZ"}}}]},  
+  {"role": "tool", "name": "search_cve", "content": "{'results': [{'id': 'CVE-2023-1234', 'summary': 'DNS server misconfiguration allows bypass of RPZ rules for DGA domains.', 'cvss_score': '7.2'}, {'id': 'CVE-2022-5678', 'summary': 'RPZ policy enforcement flaw enables C2 domain resolution in hybrid cloud environments.', 'cvss_score': '6.8'}]}"},  
+  {"role": "assistant", "content": "**Practical Example**: A hunter identifies a C2 domain `malicious-c2.example.com`. **To validate RPZ disruption, perform a DNS lookup:**", "tool_calls": [{"id": "tool_2", "type": "function", "function": {"name": "dns_lookup", "arguments": {"hostname": "malicious-c2.example.com"}]]},  
+  {"role": "tool", "name": "dns_lookup", "content": "{'result': 'malicious-c2.example.com: NXDOMAIN - Resolution blocked by DNS RPZ policy (sinkhole IP: 192.0.2.1)'}"},  
+  {"role": "assistant", "content": "These CVEs and DNS results highlight the need for RPZ in disrupting C2, while emphasizing the importance of regular CVE checks and dynamic threat intelligence integration to mitigate bypass risks."}
+APIGenMT agent failed for heimdall-2::v3: Expecting ',' delimiter: line 5 column 316 (char 1783). Using fallback metadata.
