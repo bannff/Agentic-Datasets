@@ -1,0 +1,77 @@
+# Agentic Dataset Pipeline with Unified LLM Configuration
+#
+# This pipeline demonstrates the new LLM-powered stages that use
+# real reasoning instead of simple keyword matching or templates.
+#
+# LLM Configuration:
+#   Set via this config OR environment variables:
+#   - AGENTIC_LLM_MODEL (default: ollama/qwen3:8b)
+#   - AGENTIC_LLM_TEMPERATURE (default: 0.7)
+#   - OLLAMA_HOST (default: http://localhost:11434)
+#
+# Supported providers (via LiteLLM):
+#   - ollama/qwen3:8b, ollama/llama3.2, ollama/mistral (local)
+#   - openai/gpt-4o, openai/gpt-4o-mini
+#   - anthropic/claude-4-sonnet-20250514, anthropic/claude-4-opus
+#   - bedrock/anthropic.claude-v2
+#   - together_ai/*, groq/*, mistral/* and 100+ more
+
+input: examples/sample.jsonl
+output: examples/out.llm_pipeline.jsonl
+max_records: 10
+
+# Unified LLM configuration - applies to ALL stages
+llm:
+  model: ollama/qwen3:8b  # Change to openai/gpt-4o for cloud
+  temperature: 0.7
+  max_tokens: 4096
+  # api_base: http://localhost:11434  # Uncomment for custom Ollama host
+
+stages:
+  # AgentInstruct: LLM-powered instruction transformation
+  # Uses the 7 AgentInstruct transformation types with real reasoning
+  - name: agentinstruct
+    params:
+      k_variants: 2
+      transforms:
+        - qa           # Question-answering format
+        - reasoning    # Multi-step logical analysis
+      use_llm: true    # Set false to use simple templates (faster but lower quality)
+  
+  # S2M: Single-turn to Multi-turn using LLM
+  # Generates natural follow-up conversations
+  - name: s2m
+    params:
+      min_turns: 4
+      max_turns: 8
+      use_llm: true
+  
+  # APIGenMT: LLM-based semantic tool injection
+  # Uses LLM to determine where tools genuinely help (not keyword matching)
+  - name: apigenmt
+    params:
+      use_llm: true
+      generate_responses: true  # LLM generates realistic tool outputs
+      tools:
+        - name: search_cve
+          description: "Search CVE database by keyword and return recent CVEs."
+          parameters:
+            keyword:
+              type: string
+              description: "Search term, e.g. 'buffer overflow'"
+              required: true
+        - name: dns_lookup
+          description: "Resolve DNS records for a hostname."
+          parameters:
+            hostname:
+              type: string
+              description: "Domain to resolve"
+              required: true
+  
+  # ReviewInstruct: LLM-powered quality review and refinement
+  # Chairman agent evaluates, refiner agent improves if needed
+  - name: reviewinstruct
+    params:
+      accept_threshold: 3.5  # 1-5 scale, refine if below
+      max_iterations: 2       # Max refinement attempts
+      use_llm: true

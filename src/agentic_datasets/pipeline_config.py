@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Callable, cast
 import logging
@@ -18,6 +19,34 @@ NormalizeFunc = Callable[[Any], Iterator[ConversationRecord]]  # Accepts Iterabl
 logger = logging.getLogger(__name__)
 
 
+class LLMProviderConfig(BaseModel):
+    """Unified LLM provider configuration.
+    
+    Model format follows LiteLLM convention: "provider/model_name"
+    Examples:
+        - "ollama/qwen3:8b" (local Ollama - default)
+        - "openai/gpt-4o" (OpenAI)
+        - "anthropic/claude-4-sonnet-20250514" (Anthropic)
+        - "bedrock/anthropic.claude-v2" (AWS Bedrock)
+    
+    Set via:
+        - YAML config: llm.model, llm.temperature, etc.
+        - Environment: AGENTIC_LLM_MODEL, AGENTIC_LLM_TEMPERATURE
+    """
+    model: str = Field(
+        default_factory=lambda: os.getenv("AGENTIC_LLM_MODEL", "ollama/qwen3:8b")
+    )
+    temperature: float = Field(
+        default_factory=lambda: float(os.getenv("AGENTIC_LLM_TEMPERATURE", "0.7"))
+    )
+    max_tokens: int = Field(
+        default_factory=lambda: int(os.getenv("AGENTIC_LLM_MAX_TOKENS", "4096"))
+    )
+    api_base: Optional[str] = Field(
+        default_factory=lambda: os.getenv("OLLAMA_HOST")
+    )
+
+
 class StageConfig(BaseModel):
     name: str = Field(..., description="Transform name from registry")
     params: Dict[str, Any] = Field(default_factory=dict)
@@ -29,6 +58,9 @@ class PipelineSpec(BaseModel):
     max_records: Optional[int] = None
     orchestrator: Optional[str] = Field(
         default=None, description="Optional orchestrator backend: 'strands' or None for local"
+    )
+    llm: Optional[LLMProviderConfig] = Field(
+        default=None, description="Unified LLM provider configuration for all stages"
     )
     stages: List[StageConfig] = Field(default_factory=list)  # type: ignore[assignment]
 
@@ -55,6 +87,18 @@ def run_spec(spec: PipelineSpec) -> Path:
     Returns:
         Path to final output file
     """
+    # Configure global LLM provider if specified
+    if spec.llm:
+        from .llm import LLMConfig, set_default_config
+        llm_config = LLMConfig(
+            model=spec.llm.model,
+            temperature=spec.llm.temperature,
+            max_tokens=spec.llm.max_tokens,
+            api_base=spec.llm.api_base,
+        )
+        set_default_config(llm_config)
+        logger.info(f"LLM provider configured: {spec.llm.model}")
+    
     # Create stage outputs directory
     output_dir = Path(spec.output).parent
     stages_audit_dir = output_dir / ".pipeline_stages"

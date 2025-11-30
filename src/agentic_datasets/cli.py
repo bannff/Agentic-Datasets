@@ -94,19 +94,44 @@ def metrics(
 
 @app.command()
 def doctor():
-    """Check environment for Strands/Ollama/tools readiness."""
+    """Check environment for LLM/Strands/Ollama/tools readiness."""
     report = {
         "python": {
             "version": f"{typer.__version__}",
         },
         "env": {
-            "OLLAMA_HOST": os.getenv("OLLAMA_HOST", "<unset>"),
+            "AGENTIC_LLM_MODEL": os.getenv("AGENTIC_LLM_MODEL", "<unset, default: ollama/qwen3:8b>"),
+            "AGENTIC_LLM_TEMPERATURE": os.getenv("AGENTIC_LLM_TEMPERATURE", "<unset, default: 0.7>"),
+            "OLLAMA_HOST": os.getenv("OLLAMA_HOST", "<unset, default: http://localhost:11434>"),
             "AGENTIC_TOOLS_BACKENDS": os.getenv("AGENTIC_TOOLS_BACKENDS", "<unset>"),
         },
+        "llm": {},
         "imports": {},
         "tools_resolution": {},
     }
-    # Imports
+    
+    # Check LiteLLM and LLM provider
+    try:
+        import litellm  # type: ignore
+        report["imports"]["litellm"] = True
+        
+        # Try to validate the configured provider
+        try:
+            from .llm import validate_provider, get_default_config
+            cfg = get_default_config()
+            report["llm"]["configured_model"] = cfg.model
+            result = validate_provider()
+            report["llm"]["provider_ok"] = result.get("ok", False)
+            if not result.get("ok"):
+                report["llm"]["error"] = result.get("error", "Unknown error")
+        except Exception as e:
+            report["llm"]["provider_ok"] = False
+            report["llm"]["error"] = str(e)
+    except Exception as e:
+        report["imports"]["litellm"] = f"Error: {e}"
+        report["llm"]["error"] = "LiteLLM not installed"
+    
+    # Check Strands imports
     try:
         import strands  # type: ignore
 
@@ -119,9 +144,11 @@ def doctor():
         report["imports"]["strands.models.ollama"] = True
     except Exception as e:
         report["imports"]["strands.models.ollama"] = f"Error: {e}"
+    
     # Tools backends order
     backends = [b.strip() for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands,local").split(",") if b.strip()]
     report["tools_resolution"]["backend_order"] = backends
+    
     # Try resolving a couple known tools by name
     try:
         from .local_tools import search_cve, dns_lookup  # type: ignore
@@ -133,11 +160,11 @@ def doctor():
         import importlib
 
         st = importlib.import_module("strands_tools")
-        # Probe presence without enforcing
         hasattr(st, "search_cve")
         report["tools_resolution"]["strands_tools"] = True
     except Exception as e:
         report["tools_resolution"]["strands_tools"] = f"Error: {e}"
+    
     typer.echo(json.dumps(report, indent=2))
 
 
