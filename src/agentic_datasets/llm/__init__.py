@@ -12,10 +12,10 @@ Supported providers:
 
 Usage:
     from agentic_datasets.llm import get_completion, LLMConfig
-    
+
     # Use default (from env or ollama)
     response = get_completion("Explain SQL injection")
-    
+
     # Or configure explicitly
     config = LLMConfig(model="openai/gpt-4o", temperature=0.7)
     response = get_completion("Explain SQL injection", config=config)

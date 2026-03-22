@@ -5,7 +5,7 @@ proper instruction transformation flows with LLM reasoning.
 
 The 7 core transformation types:
 1. Question Answering - Transform to Q&A format
-2. Open Domain Writing - Creative/open-ended expansion  
+2. Open Domain Writing - Creative/open-ended expansion
 3. Coding/Debugging - Code-focused transformation
 4. Classification - Categorization tasks
 5. Summarization - Compress and distill

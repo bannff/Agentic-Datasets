@@ -12,7 +12,7 @@ def test_agentic_pipeline_yaml(tmp_path: Path):
     cfg.write_text(
         f"""
 input: {sample}
-output: {tmp_path / 'out.jsonl'}
+output: {tmp_path / "out.jsonl"}
 orchestrator: strands
 stages:
   - name: agentinstruct

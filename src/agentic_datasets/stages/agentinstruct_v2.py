@@ -58,12 +58,12 @@ def _transform_with_llm(
     config: LLMConfig,
 ) -> Optional[str]:
     """Transform a seed instruction using LLM reasoning.
-    
+
     Args:
         seed: The original instruction text
         transform_type: One of the 7 transformation types
         config: LLM configuration
-    
+
     Returns:
         Transformed instruction or None on failure
     """
@@ -71,9 +71,9 @@ def _transform_with_llm(
     if not prompt_template:
         logger.warning(f"Unknown transform type: {transform_type}")
         return None
-    
+
     prompt = prompt_template.format(seed=seed)
-    
+
     try:
         response = get_completion(
             prompt,
@@ -94,23 +94,24 @@ def _adjust_complexity(
     config: LLMConfig,
 ) -> Optional[str]:
     """Adjust instruction complexity using LLM.
-    
+
     Args:
         instruction: The instruction to adjust
         level: beginner, intermediate, or advanced
         config: LLM configuration
-    
+
     Returns:
         Adjusted instruction or None on failure
     """
     prompt_template = COMPLEXITY_PROMPTS.get(level)
     if not prompt_template:
         return None
-    
+
     prompt = prompt_template.format(instruction=instruction)
-    
+
     try:
         from ..llm.prompts.agentinstruct import COMPLEXITY_SYSTEM
+
         response = get_completion(
             prompt,
             system_prompt=COMPLEXITY_SYSTEM,
@@ -126,7 +127,7 @@ def _adjust_complexity(
 
 def _fallback_transform(seed: str, transform_type: str) -> str:
     """Fallback transformation when LLM is unavailable.
-    
+
     Uses simple suffix-based transformations as a last resort.
     """
     suffixes = {
@@ -152,10 +153,10 @@ def agentinstruct(
     llm_config: Optional[Dict[str, Any]] = None,
 ) -> Iterator[ConversationRecord]:
     """Expand each record into k diverse instruction variants using LLM reasoning.
-    
+
     This implements the AgentInstruct methodology with real LLM-powered
     transformations instead of simple string templates.
-    
+
     Args:
         records: Input stream of ConversationRecord
         k_variants: Number of variants to generate per input
@@ -166,7 +167,7 @@ def agentinstruct(
         dedupe: Remove duplicate/similar variants
         use_llm: Whether to use LLM (False falls back to templates)
         llm_config: Optional LLM configuration override
-    
+
     Yields:
         ConversationRecord items, one per variant (fan-out)
     """
@@ -174,32 +175,29 @@ def agentinstruct(
     config = LLMConfig(**(llm_config or {})) if llm_config else get_default_config()
     transform_types = transforms or DEFAULT_TRANSFORMS
     k = max(1, int(k_variants))
-    
+
     # Log configuration
     logger.info(f"AgentInstruct: k={k}, transforms={transform_types}, use_llm={use_llm}")
     if use_llm:
         logger.info(f"Using LLM: {config.model}")
-    
+
     for rec in records:
         # Find first user message as seed
-        user_idx = next(
-            (i for i, m in enumerate(rec.messages) if m.role == "user"),
-            None
-        )
+        user_idx = next((i for i, m in enumerate(rec.messages) if m.role == "user"), None)
         if user_idx is None:
             yield rec
             continue
-        
+
         seed = rec.messages[user_idx].content
         origin_id = rec.id
-        
+
         # Generate variants using selected transforms
         candidates: List[tuple[str, str]] = []  # (variant_text, transform_type)
-        
+
         for transform_type in transform_types:
             if len(candidates) >= k:
                 break
-            
+
             if use_llm:
                 variant = _transform_with_llm(seed, transform_type, config)
                 if variant and variant != seed:
@@ -207,7 +205,7 @@ def agentinstruct(
             else:
                 variant = _fallback_transform(seed, transform_type)
                 candidates.append((variant, transform_type))
-        
+
         # Apply complexity adjustments if requested
         if complexity_levels and use_llm:
             adjusted: List[tuple[str, str]] = []
@@ -220,7 +218,7 @@ def agentinstruct(
                         adjusted.append((adj, f"{ttype}_{level}"))
             if adjusted:
                 candidates = adjusted[:k]
-        
+
         # Deduplicate by content hash
         if dedupe:
             unique: Dict[str, tuple[str, str]] = {}
@@ -229,10 +227,10 @@ def agentinstruct(
                 if h not in unique:
                     unique[h] = (variant, ttype)
             candidates = list(unique.values())
-        
+
         # Take top k
         candidates = candidates[:k]
-        
+
         # Yield variant records
         for i, (variant, transform_type) in enumerate(candidates, start=1):
             # Rewrite first user message; keep rest unchanged
@@ -242,19 +240,21 @@ def agentinstruct(
                     new_messages.append(Message(role="user", content=variant))
                 else:
                     new_messages.append(msg)
-            
+
             meta: Dict[str, Any] = dict(rec.metadata or {})
-            meta.update({
-                "stage": "agentinstruct",
-                "origin_id": origin_id,
-                "variant_id": f"v{i}",
-                "transform_type": transform_type,
-                "variant_prompt": variant,
-                "diversity_score": _jaccard_diversity(variant, seed),
-                "llm_generated": use_llm,
-                "model": config.model if use_llm else None,
-            })
-            
+            meta.update(
+                {
+                    "stage": "agentinstruct",
+                    "origin_id": origin_id,
+                    "variant_id": f"v{i}",
+                    "transform_type": transform_type,
+                    "variant_prompt": variant,
+                    "diversity_score": _jaccard_diversity(variant, seed),
+                    "llm_generated": use_llm,
+                    "model": config.model if use_llm else None,
+                }
+            )
+
             yield ConversationRecord(
                 messages=new_messages,
                 id=(rec.id or "rec") + f"::v{i}",

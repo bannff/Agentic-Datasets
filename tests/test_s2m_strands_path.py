@@ -31,6 +31,7 @@ def test_s2m_prefers_strands_when_available(monkeypatch):
 
             return SimpleNamespace(Agent=Agent)
         if name == "strands.models.ollama":
+
             class OllamaModel:
                 def __init__(self, host: str, model_id: str):
                     self.host = host

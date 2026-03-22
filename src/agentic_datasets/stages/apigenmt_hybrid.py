@@ -44,13 +44,13 @@ def apigenmt(
     **kwargs: Any,
 ) -> Iterator[ConversationRecord]:
     """APIGenMT Hybrid: Fast semantic tool injection using local Qwen3.
-    
+
     For each assistant message:
     1. Ask Qwen3 (local): "Should this use a tool? TOOL_NAME or NONE"
     2. Parse single-word response
     3. Inject tool call if selected
     4. Add synthetic response
-    
+
     ~10x faster than full regeneration, semantically meaningful.
     """
     # Config coercion
@@ -64,10 +64,18 @@ def apigenmt(
     else:
         if kwargs:
             cfg = APIGenMTConfig(
-                provider=kwargs.get("provider", config.provider if hasattr(config, "provider") else "ollama"),
-                model_name=kwargs.get("model_name", config.model_name if hasattr(config, "model_name") else None),
-                temperature=kwargs.get("temperature", config.temperature if hasattr(config, "temperature") else 0.1),
-                enabled=kwargs.get("enabled", config.enabled if hasattr(config, "enabled") else True),
+                provider=kwargs.get(
+                    "provider", config.provider if hasattr(config, "provider") else "ollama"
+                ),
+                model_name=kwargs.get(
+                    "model_name", config.model_name if hasattr(config, "model_name") else None
+                ),
+                temperature=kwargs.get(
+                    "temperature", config.temperature if hasattr(config, "temperature") else 0.1
+                ),
+                enabled=kwargs.get(
+                    "enabled", config.enabled if hasattr(config, "enabled") else True
+                ),
                 tools=kwargs.get("tools", config.tools if hasattr(config, "tools") else []),
             )
         else:
@@ -82,6 +90,7 @@ def apigenmt(
     if cfg.provider.lower() == "ollama":
         try:
             import importlib
+
             strands_module = importlib.import_module("strands")
             ollama_module = importlib.import_module("strands.models.ollama")
             Agent = getattr(strands_module, "Agent")
@@ -92,7 +101,9 @@ def apigenmt(
             strands_agent = Agent(model=model)
             logger.debug(f"Strands Agent initialized with {cfg.model_name} at {host}")
         except Exception as e:
-            logger.warning(f"Strands Agent unavailable for APIGenMT: {e}. Will use keyword fallback.")
+            logger.warning(
+                f"Strands Agent unavailable for APIGenMT: {e}. Will use keyword fallback."
+            )
             strands_agent = None
 
     # Tool name list for prompting
@@ -108,7 +119,9 @@ def apigenmt(
                 "agentic": False,
                 "via": "passthrough",
             }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )
             continue
 
         try:
@@ -119,7 +132,7 @@ def apigenmt(
             for i, msg in enumerate(new_messages):
                 if msg.role == "assistant" and injected_count < 2:  # Max 2 tools per conversation
                     content = msg.content or ""
-                    
+
                     if strands_agent:
                         # Fast prompt: just ask which tool (if any)
                         tool_decision_prompt = f"""Given this assistant response, should it include a tool call?
@@ -135,7 +148,16 @@ Answer with ONLY the tool name (e.g., "search_cve", "dns_lookup") or "NONE" if n
                                 tool_decision_prompt,
                                 params={"temperature": cfg.temperature},
                             )
-                            tool_decision = (getattr(result, "text", None) or getattr(result, "content", None) or str(result)).strip().split()[0].lower()
+                            tool_decision = (
+                                (
+                                    getattr(result, "text", None)
+                                    or getattr(result, "content", None)
+                                    or str(result)
+                                )
+                                .strip()
+                                .split()[0]
+                                .lower()
+                            )
                         except Exception as e:
                             logger.debug(f"Tool decision failed: {e}. Using keyword fallback.")
                             tool_decision = "none"
@@ -210,7 +232,9 @@ Answer with ONLY the tool name (e.g., "search_cve", "dns_lookup") or "NONE" if n
                 "provider": cfg.provider,
                 "model": cfg.model_name,
             }
-            yield ConversationRecord(messages=new_messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=new_messages, metadata=meta, source=rec.source, id=rec.id
+            )
 
         except Exception as e:
             logger.warning(f"APIGenMT hybrid failed for {rec.id}: {e}")
@@ -220,4 +244,6 @@ Answer with ONLY the tool name (e.g., "search_cve", "dns_lookup") or "NONE" if n
                 "agentic": False,
                 "via": "error",
             }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )

@@ -21,30 +21,27 @@ logger = logging.getLogger(__name__)
 
 class LLMProviderConfig(BaseModel):
     """Unified LLM provider configuration.
-    
+
     Model format follows LiteLLM convention: "provider/model_name"
     Examples:
         - "ollama/qwen3:8b" (local Ollama - default)
         - "openai/gpt-4o" (OpenAI)
         - "anthropic/claude-4-sonnet-20250514" (Anthropic)
         - "bedrock/anthropic.claude-v2" (AWS Bedrock)
-    
+
     Set via:
         - YAML config: llm.model, llm.temperature, etc.
         - Environment: AGENTIC_LLM_MODEL, AGENTIC_LLM_TEMPERATURE
     """
-    model: str = Field(
-        default_factory=lambda: os.getenv("AGENTIC_LLM_MODEL", "ollama/qwen3:8b")
-    )
+
+    model: str = Field(default_factory=lambda: os.getenv("AGENTIC_LLM_MODEL", "ollama/qwen3:8b"))
     temperature: float = Field(
         default_factory=lambda: float(os.getenv("AGENTIC_LLM_TEMPERATURE", "0.7"))
     )
     max_tokens: int = Field(
         default_factory=lambda: int(os.getenv("AGENTIC_LLM_MAX_TOKENS", "4096"))
     )
-    api_base: Optional[str] = Field(
-        default_factory=lambda: os.getenv("OLLAMA_HOST")
-    )
+    api_base: Optional[str] = Field(default_factory=lambda: os.getenv("OLLAMA_HOST"))
 
 
 class StageConfig(BaseModel):
@@ -80,16 +77,17 @@ def load_spec(path: Path) -> PipelineSpec:
 
 def run_spec(spec: PipelineSpec) -> Path:
     """Run pipeline stages, saving intermediate outputs to audit trail.
-    
+
     Args:
         spec: PipelineSpec with input, output, and stages
-        
+
     Returns:
         Path to final output file
     """
     # Configure global LLM provider if specified
     if spec.llm:
         from .llm import LLMConfig, set_default_config
+
         llm_config = LLMConfig(
             model=spec.llm.model,
             temperature=spec.llm.temperature,
@@ -98,21 +96,21 @@ def run_spec(spec: PipelineSpec) -> Path:
         )
         set_default_config(llm_config)
         logger.info(f"LLM provider configured: {spec.llm.model}")
-    
+
     # Create stage outputs directory
     output_dir = Path(spec.output).parent
     stages_audit_dir = output_dir / ".pipeline_stages"
     stages_audit_dir.mkdir(parents=True, exist_ok=True)
-    
+
     logger.info(f"Pipeline audit trail: {stages_audit_dir}")
-    
+
     # Load and normalize input
     records: Iterator[Dict[str, Any]] = ingest(spec.input)  # type: ignore[assignment]
     stream: Iterator[ConversationRecord] = normalize(records)  # type: ignore[arg-type]
-    
+
     # Ensure stages are properly typed
     stages: List[StageConfig] = spec.stages  # type: ignore
-    
+
     # Process through stages with intermediate checkpoints
     if spec.orchestrator == "strands":
         from .orchestrators.strands import run_strands_pipeline
@@ -123,20 +121,22 @@ def run_spec(spec: PipelineSpec) -> Path:
         for stage_idx, st in enumerate(stages, 1):
             transform = registry.get(st.name)
             stream = transform(stream, **st.params)
-            
+
             # Save intermediate output (create new list from stream to avoid consuming iterator)
             stage_output_path = stages_audit_dir / f"{stage_idx:02d}_{st.name}.jsonl"
             items: List[ConversationRecord] = []
             for rec in stream:  # type: ignore
                 items.append(rec)
-                
+
             # Export intermediate checkpoint
             export(items, stage_output_path)
-            logger.info(f"Stage {stage_idx} ({st.name}): {len(items)} records → {stage_output_path}")
-            
+            logger.info(
+                f"Stage {stage_idx} ({st.name}): {len(items)} records → {stage_output_path}"
+            )
+
             # Convert back to iterator for next stage (or final output)
             stream = iter(items)
-    
+
     # Truncate if needed and save final output
     if spec.max_records is not None:
         items_final: List[ConversationRecord] = []
@@ -154,5 +154,5 @@ def run_spec(spec: PipelineSpec) -> Path:
             items_final = stream  # type: ignore
         export(items_final, spec.output)
         logger.info(f"Final output: {len(items_final)} records → {spec.output}")
-    
+
     return spec.output

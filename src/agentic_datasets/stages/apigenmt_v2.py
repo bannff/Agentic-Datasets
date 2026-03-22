@@ -37,7 +37,7 @@ def _format_tools_catalog(tools: List[Dict[str, Any]]) -> str:
         name = tool.get("name", "unknown")
         desc = tool.get("description", "")
         params = tool.get("parameters", {})
-        
+
         lines.append(f"- {name}: {desc}")
         if params:
             param_strs: List[str] = []
@@ -46,14 +46,14 @@ def _format_tools_catalog(tools: List[Dict[str, Any]]) -> str:
                 required = " (required)" if pinfo.get("required") else ""
                 param_strs.append(f"    {pname}: {ptype}{required}")
             lines.extend(param_strs)
-    
+
     return "\n".join(lines)
 
 
 def _parse_tool_analysis(text: str) -> Optional[Dict[str, Any]]:
     """Parse tool analysis JSON from LLM response."""
     text = text.strip()
-    
+
     # Try direct parse
     try:
         data: Dict[str, Any] = json.loads(text)
@@ -61,7 +61,7 @@ def _parse_tool_analysis(text: str) -> Optional[Dict[str, Any]]:
             return data
     except json.JSONDecodeError:
         pass
-    
+
     # Try to extract JSON from code blocks
     for marker in ["```json", "```"]:
         if marker in text:
@@ -74,18 +74,18 @@ def _parse_tool_analysis(text: str) -> Optional[Dict[str, Any]]:
                         return data
                 except json.JSONDecodeError:
                     pass
-    
+
     # Try to find JSON object
     start = text.find("{")
     end = text.rfind("}")
     if start >= 0 and end > start:
         try:
-            data = json.loads(text[start:end + 1])
+            data = json.loads(text[start : end + 1])
             if isinstance(data, dict) and "tool_calls" in data:
                 return data
         except json.JSONDecodeError:
             pass
-    
+
     return None
 
 
@@ -95,7 +95,7 @@ def _analyze_for_tools(
     config: LLMConfig,
 ) -> List[Dict[str, Any]]:
     """Use LLM to analyze conversation and identify tool injection points.
-    
+
     Returns:
         List of tool call specifications with:
         - after_message_index: Which message to inject after
@@ -105,12 +105,12 @@ def _analyze_for_tools(
     """
     conversation = _format_conversation(messages)
     tools_catalog = _format_tools_catalog(tools)
-    
+
     prompt = APIGENMT_ANALYZE.format(
         conversation=conversation,
         tools=tools_catalog,
     )
-    
+
     try:
         response = get_completion(
             prompt,
@@ -119,14 +119,14 @@ def _analyze_for_tools(
             temperature=0.5,  # Lower for more consistent analysis
             max_tokens=1024,
         )
-        
+
         analysis = _parse_tool_analysis(response)
         if analysis and "tool_calls" in analysis:
             return analysis["tool_calls"]
-        
+
         logger.warning("Failed to parse tool analysis response")
         return []
-        
+
     except Exception as e:
         logger.warning(f"Tool analysis failed: {e}")
         return []
@@ -144,7 +144,7 @@ def _generate_tool_response(
         arguments=json.dumps(arguments),
         description=tool_desc,
     )
-    
+
     try:
         response = get_completion(
             prompt,
@@ -169,10 +169,10 @@ def apigenmt(
     config: Optional[Dict[str, Any]] = None,  # Legacy
 ) -> Iterator[ConversationRecord]:
     """Inject tool calls into conversations using LLM semantic analysis.
-    
+
     Uses LLM reasoning to determine where tool calls would genuinely help,
     rather than simple keyword matching.
-    
+
     Args:
         records: Input conversation records
         tools: List of tool definitions with name, description, parameters
@@ -181,16 +181,16 @@ def apigenmt(
         generate_responses: Whether to generate realistic tool responses
         llm_config: LLM configuration override
         config: Legacy config parameter
-    
+
     Yields:
         Conversations with tool calls injected
     """
     # Handle legacy config
     if config and not llm_config:
         llm_config = config
-    
+
     cfg = LLMConfig(**(llm_config or {})) if llm_config else get_default_config()
-    
+
     if not tools:
         logger.info("APIGenMT: No tools configured, passing through")
         for rec in records:
@@ -203,14 +203,14 @@ def apigenmt(
                 id=rec.id,
             )
         return
-    
+
     # Build tool description lookup
     tool_descs: Dict[str, str] = {t.get("name", ""): t.get("description", "") for t in tools}
-    
+
     logger.info(f"APIGenMT: {len(tools)} tools, use_llm={use_llm}")
     if use_llm:
         logger.info(f"Using LLM: {cfg.model}")
-    
+
     for rec in records:
         if not use_llm:
             # Pass through without tool injection
@@ -223,11 +223,11 @@ def apigenmt(
                 id=rec.id,
             )
             continue
-        
+
         try:
             # Analyze conversation for tool injection points
             tool_calls_spec = _analyze_for_tools(rec.messages, tools, cfg)
-            
+
             if not tool_calls_spec:
                 # No tools needed
                 no_tools_meta: Dict[str, Any] = dict(rec.metadata or {})
@@ -239,31 +239,31 @@ def apigenmt(
                     id=rec.id,
                 )
                 continue
-            
+
             # Limit tool calls
             tool_calls_spec = tool_calls_spec[:max_tools_per_conversation]
-            
+
             # Build new message list with injected tool calls
             new_messages: List[Message] = list(rec.messages)
             injected_count = 0
-            
+
             # Sort by index descending to insert from end (prevents index shift issues)
             tool_calls_spec.sort(key=lambda x: x.get("after_message_index", 0), reverse=True)
-            
+
             for spec in tool_calls_spec:
                 idx: int = spec.get("after_message_index", 0)
                 tool_name: str = spec.get("tool_name", "")
                 arguments: Dict[str, Any] = spec.get("arguments", {})
-                
+
                 if idx < 0 or idx >= len(new_messages):
                     continue
-                
+
                 msg: Message = new_messages[idx]
-                
+
                 # Check if this is an assistant message
                 if msg.role != "assistant":
                     continue
-                
+
                 # Create tool call
                 tool_call = ToolCall(
                     id=f"tc_{rec.id}_{injected_count}",
@@ -271,7 +271,7 @@ def apigenmt(
                     arguments=arguments,
                     status="completed",
                 )
-                
+
                 # Add tool call to the assistant message
                 existing_calls: List[ToolCall] = list(msg.tool_calls or [])
                 existing_calls.append(tool_call)
@@ -281,7 +281,7 @@ def apigenmt(
                     metadata=msg.metadata,
                     tool_calls=existing_calls,
                 )
-                
+
                 # Generate and insert tool response
                 if generate_responses:
                     tool_response_content = _generate_tool_response(
@@ -292,7 +292,7 @@ def apigenmt(
                     )
                 else:
                     tool_response_content = f"[{tool_name} result]"
-                
+
                 tool_response = Message(
                     role="tool",
                     content=tool_response_content,
@@ -301,23 +301,25 @@ def apigenmt(
                 )
                 new_messages.insert(idx + 1, tool_response)
                 injected_count += 1
-            
+
             meta: Dict[str, Any] = dict(rec.metadata or {})
-            meta.update({
-                "stage": "apigenmt",
-                "agentic": True,
-                "via": "llm",
-                "model": cfg.model,
-                "tools_injected": injected_count,
-            })
-            
+            meta.update(
+                {
+                    "stage": "apigenmt",
+                    "agentic": True,
+                    "via": "llm",
+                    "model": cfg.model,
+                    "tools_injected": injected_count,
+                }
+            )
+
             yield ConversationRecord(
                 messages=new_messages,
                 metadata=meta,
                 source=rec.source,
                 id=rec.id,
             )
-            
+
         except Exception as e:
             logger.warning(f"APIGenMT failed for {rec.id}: {e}")
             meta_err: Dict[str, Any] = dict(rec.metadata or {})

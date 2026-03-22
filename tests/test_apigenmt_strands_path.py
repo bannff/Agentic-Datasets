@@ -24,11 +24,19 @@ def test_apigenmt_uses_strands_when_available(monkeypatch):
                         {
                             "id": "call_1",
                             "type": "function",
-                            "function": {"name": "port_scan", "arguments": json.dumps({"host": "example.com"})},
+                            "function": {
+                                "name": "port_scan",
+                                "arguments": json.dumps({"host": "example.com"}),
+                            },
                         }
                     ],
                 },
-                {"role": "tool", "name": "port_scan", "tool_call_id": "call_1", "content": "22,80 open"},
+                {
+                    "role": "tool",
+                    "name": "port_scan",
+                    "tool_call_id": "call_1",
+                    "content": "22,80 open",
+                },
                 {"role": "assistant", "content": "Scan shows 22 and 80 open."},
             ]
             return SimpleNamespace(text=json.dumps(convo))
@@ -58,7 +66,10 @@ def test_apigenmt_uses_strands_when_available(monkeypatch):
         metadata=None,
     )
 
-    cfg = APIGenMTConfig(enabled=True, tools=[{"name": "port_scan", "parameters": {"host": {"type": "string", "required": True}}}])
+    cfg = APIGenMTConfig(
+        enabled=True,
+        tools=[{"name": "port_scan", "parameters": {"host": {"type": "string", "required": True}}}],
+    )
 
     out = list(apigenmt([rec], cfg))
     assert len(out) == 1

@@ -1,6 +1,6 @@
 """S2M Stage: Single-turn to Multi-turn Conversion using LLM.
 
-Transforms single-turn Q&A pairs into coherent, natural multi-turn 
+Transforms single-turn Q&A pairs into coherent, natural multi-turn
 conversations using LLM reasoning for high-quality expansion.
 """
 
@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 def _parse_messages_json(text: str) -> Optional[List[Dict[str, str]]]:
     """Parse JSON array of messages from LLM response.
-    
+
     Handles cases where the model wraps JSON in markdown or prose.
     """
     text = text.strip()
-    
+
     # Try direct parse first
     try:
         data: List[Dict[str, str]] = json.loads(text)
@@ -31,7 +31,7 @@ def _parse_messages_json(text: str) -> Optional[List[Dict[str, str]]]:
             return data
     except json.JSONDecodeError:
         pass
-    
+
     # Try to extract JSON array from markdown code block
     if "```json" in text:
         start = text.find("```json") + 7
@@ -41,7 +41,7 @@ def _parse_messages_json(text: str) -> Optional[List[Dict[str, str]]]:
                 return json.loads(text[start:end].strip())
             except json.JSONDecodeError:
                 pass
-    
+
     # Try to extract JSON array from plain code block
     if "```" in text:
         start = text.find("```") + 3
@@ -51,16 +51,16 @@ def _parse_messages_json(text: str) -> Optional[List[Dict[str, str]]]:
                 return json.loads(text[start:end].strip())
             except json.JSONDecodeError:
                 pass
-    
+
     # Try to find array brackets
     start = text.find("[")
     end = text.rfind("]")
     if start >= 0 and end > start:
         try:
-            return json.loads(text[start:end + 1])
+            return json.loads(text[start : end + 1])
         except json.JSONDecodeError:
             pass
-    
+
     return None
 
 
@@ -70,17 +70,17 @@ def _generate_multiturn(
     config: LLMConfig,
 ) -> Optional[List[Message]]:
     """Generate multi-turn conversation using LLM.
-    
+
     Args:
         question: Original user question
         answer: Original assistant answer
         config: LLM configuration
-    
+
     Returns:
         List of Message objects or None on failure
     """
     prompt = S2M_TRANSFORM.format(question=question, answer=answer)
-    
+
     try:
         response = get_completion(
             prompt,
@@ -89,26 +89,26 @@ def _generate_multiturn(
             temperature=0.7,
             max_tokens=2048,
         )
-        
+
         messages_data = _parse_messages_json(response)
         if not messages_data:
             logger.warning("Failed to parse S2M response as JSON")
             return None
-        
+
         messages: List[Message] = []
         for m in messages_data:
             role = m.get("role", "").strip()
             content = m.get("content", "").strip()
             if role in ("user", "assistant", "system") and content:
                 messages.append(Message(role=role, content=content))
-        
+
         # Ensure we have at least 4 messages (2 turns)
         if len(messages) >= 4:
             return messages
-        
+
         logger.warning(f"S2M generated only {len(messages)} messages, need at least 4")
         return None
-        
+
     except Exception as e:
         logger.warning(f"S2M LLM generation failed: {e}")
         return None
@@ -116,7 +116,7 @@ def _generate_multiturn(
 
 def _fallback_multiturn(rec: ConversationRecord) -> ConversationRecord:
     """Fallback multi-turn generation without LLM.
-    
+
     Adds a simple follow-up question and answer as a placeholder.
     """
     return ConversationRecord(
@@ -126,7 +126,7 @@ def _fallback_multiturn(rec: ConversationRecord) -> ConversationRecord:
             Message(role="user", content="Can you provide an example?"),
             Message(
                 role="assistant",
-                content="[Example would be provided here with LLM generation enabled]"
+                content="[Example would be provided here with LLM generation enabled]",
             ),
         ],
         metadata={
@@ -151,10 +151,10 @@ def s2m(
     config: Optional[Dict[str, Any]] = None,  # Legacy param
 ) -> Iterator[ConversationRecord]:
     """Convert single-turn Q&A pairs to multi-turn conversations.
-    
+
     Uses LLM reasoning to generate natural, coherent follow-up turns
     that expand on the original topic.
-    
+
     Args:
         records: Input conversation records
         min_turns: Minimum messages in output (default 4 = 2 turns)
@@ -162,27 +162,27 @@ def s2m(
         use_llm: Whether to use LLM (False falls back to placeholder)
         llm_config: LLM configuration override
         config: Legacy config parameter (deprecated, use llm_config)
-    
+
     Yields:
         Multi-turn conversation records
     """
     # Handle legacy config parameter
     if config and not llm_config:
         llm_config = config
-    
+
     cfg = LLMConfig(**(llm_config or {})) if llm_config else get_default_config()
-    
+
     logger.info(f"S2M: use_llm={use_llm}, min_turns={min_turns}")
     if use_llm:
         logger.info(f"Using LLM: {cfg.model}")
-    
+
     for rec in records:
         # If already multi-turn, pass through
         if len(rec.messages) > 2:
             logger.debug(f"Record {rec.id} already multi-turn ({len(rec.messages)} messages)")
             yield rec
             continue
-        
+
         # Check for single-turn Q&A structure
         if (
             len(rec.messages) == 2
@@ -195,12 +195,12 @@ def s2m(
                     rec.messages[1].content,
                     cfg,
                 )
-                
+
                 if messages:
                     # Truncate if too long
                     if len(messages) > max_turns:
                         messages = messages[:max_turns]
-                    
+
                     yield ConversationRecord(
                         messages=messages,
                         metadata={
@@ -215,18 +215,17 @@ def s2m(
                         id=rec.id,
                     )
                     continue
-            
+
             # Fallback
             yield _fallback_multiturn(rec)
-        
+
         elif len(rec.messages) == 1 and rec.messages[0].role == "user":
             # Single user message - add placeholder assistant response
             yield ConversationRecord(
                 messages=[
                     rec.messages[0],
                     Message(
-                        role="assistant",
-                        content="[Response would be generated with LLM enabled]"
+                        role="assistant", content="[Response would be generated with LLM enabled]"
                     ),
                 ],
                 metadata={

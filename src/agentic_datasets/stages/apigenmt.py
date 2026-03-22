@@ -40,9 +40,9 @@ class APIGenMTConfig:
 
 def _build_semantic_keywords(tool_config: Dict[str, Any]) -> Tuple[str, List[str], Dict[str, str]]:
     """Build semantic keyword map for a tool.
-    
+
     Returns: (tool_name, keywords_list, param_hints_dict)
-    
+
     Strategy: Build multiple levels of keywords:
     - Exact: "cve", "dns", etc.
     - Related: "vulnerability", "database" for CVE; "hostname", "resolve" for DNS
@@ -50,26 +50,43 @@ def _build_semantic_keywords(tool_config: Dict[str, Any]) -> Tuple[str, List[str
     """
     tool_name = tool_config.get("name", "unknown")
     description = (tool_config.get("description") or "").lower()
-    
+
     # Semantic keyword extraction
     keywords: List[str] = []
-    
+
     # Add tool name parts (exact match)
     for part in tool_name.split("_"):
         if len(part) > 2:
             keywords.append(part.lower())
-    
+
     # Add description keywords (filter common words)
-    stop_words = {"the", "a", "an", "and", "or", "is", "for", "in", "to", "of", "by", "with", "on", "as"}
+    stop_words = {
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "is",
+        "for",
+        "in",
+        "to",
+        "of",
+        "by",
+        "with",
+        "on",
+        "as",
+    }
     for word in description.split():
         word = word.lower().strip(".,;:")
         if len(word) > 3 and word not in stop_words:
             keywords.append(word)
-    
+
     # Add tool-specific contextual keywords from Strands tools
     # Optimized for Heimdall cybersecurity dataset
     if tool_name == "tavily_search":
-        keywords.extend(["search", "research", "find", "threat", "intelligence", "vulnerability", "news"])
+        keywords.extend(
+            ["search", "research", "find", "threat", "intelligence", "vulnerability", "news"]
+        )
     elif tool_name == "tavily_extract":
         keywords.extend(["extract", "advisory", "report", "analysis", "content"])
     elif tool_name == "tavily_crawl":
@@ -101,7 +118,17 @@ def _build_semantic_keywords(tool_config: Dict[str, Any]) -> Tuple[str, List[str
     elif tool_name == "think":
         keywords.extend(["analyze", "reasoning", "threat", "attack"])
     elif tool_name == "retrieve":
-        keywords.extend(["retrieve", "knowledge", "intelligence", "database", "information", "patterns", "threat"])
+        keywords.extend(
+            [
+                "retrieve",
+                "knowledge",
+                "intelligence",
+                "database",
+                "information",
+                "patterns",
+                "threat",
+            ]
+        )
     elif tool_name == "mem0_memory":
         keywords.extend(["memory", "patterns", "threat", "actor"])
     elif tool_name == "environment":
@@ -136,14 +163,22 @@ def _build_semantic_keywords(tool_config: Dict[str, Any]) -> Tuple[str, List[str
         keywords.extend(["system", "automation"])
     elif tool_name == "load_tool":
         keywords.extend(["tool"])
-    
+
     # Remove duplicates while preserving order
     keywords = list(dict.fromkeys(keywords))
-    
+
     # Build parameter hints (what to look for in text to extract params)
     param_hints: Dict[str, str] = {}
     for param_name, param_spec in (tool_config.get("parameters") or {}).items():  # type: ignore
-        if "keyword" in param_name or "query" in param_name or "search" in param_name or "indicator" in param_name or "hash" in param_name or "url" in param_name or "hash_or_url" in param_name:
+        if (
+            "keyword" in param_name
+            or "query" in param_name
+            or "search" in param_name
+            or "indicator" in param_name
+            or "hash" in param_name
+            or "url" in param_name
+            or "hash_or_url" in param_name
+        ):
             param_hints[param_name] = "search"
         elif "hostname" in param_name or "domain" in param_name or "host" in param_name:
             param_hints[param_name] = "hostname"
@@ -153,44 +188,59 @@ def _build_semantic_keywords(tool_config: Dict[str, Any]) -> Tuple[str, List[str
             param_hints[param_name] = "port"
         else:
             param_hints[param_name] = "generic"
-    
+
     return tool_name, keywords, param_hints
 
 
 def _extract_parameter_value(param_type: str, content: str, param_name: str) -> str:
     """Extract a parameter value from content based on type hint.
-    
+
     Args:
         param_type: "search", "hostname", "ip", "port", "generic"
         content: The assistant's response text
         param_name: Parameter name (for fallback)
-    
+
     Returns:
         Extracted value or sensible default
     """
     words = content.split()
-    
+
     if param_type == "search":
         # For search/keyword params, extract first few important words
         # Skip common words and get substantive content
-        stop = {"the", "a", "an", "and", "or", "is", "for", "in", "to", "of", "by", "with", "on", "at"}
+        stop = {
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "is",
+            "for",
+            "in",
+            "to",
+            "of",
+            "by",
+            "with",
+            "on",
+            "at",
+        }
         important_words = [w for w in words[:20] if len(w) > 3 and w.lower() not in stop]
         return " ".join(important_words[:3]) if important_words else "security"
-    
+
     elif param_type == "hostname":
         # Look for domain patterns or use generic
         for word in words:
             if "." in word and len(word) > 4:
                 return word.strip(".,;:")
         return "example.com"
-    
+
     elif param_type == "ip":
         # Look for IP-like patterns
         for word in words:
             if word.count(".") == 3:
                 return word
         return "192.0.2.1"
-    
+
     elif param_type == "port":
         # Look for port numbers (1-65535)
         for word in words:
@@ -201,7 +251,7 @@ def _extract_parameter_value(param_type: str, content: str, param_name: str) -> 
             except ValueError:
                 pass
         return "443"
-    
+
     else:  # generic
         return content[:50] if content else ""
 
@@ -212,13 +262,13 @@ def apigenmt(
     **kwargs: Any,
 ) -> Iterator[ConversationRecord]:
     """APIGenMT Smart: Fast semantic tool injection for training.
-    
+
     For each assistant message:
     1. Score semantic relevance to each available tool
     2. Inject highest-relevance tools (up to 2 per conversation)
     3. Extract parameters contextually
     4. Add synthetic tool responses
-    
+
     Result: High-quality tool-augmented conversations for training.
     """
     # Config coercion
@@ -245,7 +295,9 @@ def apigenmt(
                 "agentic": False,
                 "via": "no_tools",
             }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )
         return
 
     # Build semantic keyword maps for all tools
@@ -262,25 +314,35 @@ def apigenmt(
 
             # For each assistant message, find relevant tools
             for i, msg in enumerate(new_messages):
-                if msg.role == "assistant" and injected_count < 4:  # Max 4 tools per conversation for variety
+                if (
+                    msg.role == "assistant" and injected_count < 4
+                ):  # Max 4 tools per conversation for variety
                     content = msg.content or ""
                     content_lower = content.lower()
 
                     # Score each tool for relevance to this message
-                    tool_scores: List[Tuple[float, str, List[str], Dict[str, str], Dict[str, Any]]] = []
-                    
+                    tool_scores: List[
+                        Tuple[float, str, List[str], Dict[str, str], Dict[str, Any]]
+                    ] = []
+
                     for tool_name, keywords, param_hints, tool_config in tool_semantics:  # type: ignore
                         # Count keyword matches - use word boundaries for accuracy
                         # Look for exact keyword matches to avoid false positives
                         matches = 0
                         for kw in keywords:
                             # Check for word-boundary matches
-                            if f" {kw} " in f" {content_lower} " or content_lower.startswith(kw + " ") or content_lower.endswith(f" {kw}"):
+                            if (
+                                f" {kw} " in f" {content_lower} "
+                                or content_lower.startswith(kw + " ")
+                                or content_lower.endswith(f" {kw}")
+                            ):
                                 matches += 1
-                        
+
                         if matches > 0:
                             score = matches / len(keywords) if keywords else 0
-                            tool_scores.append((score, tool_name, keywords, param_hints, tool_config))
+                            tool_scores.append(
+                                (score, tool_name, keywords, param_hints, tool_config)
+                            )
 
                     # Select highest-scoring tool if any match
                     if tool_scores:
@@ -290,7 +352,9 @@ def apigenmt(
                         # Extract parameters
                         arguments: Dict[str, Any] = {}
                         for param_name, param_type in param_hints.items():
-                            arguments[param_name] = _extract_parameter_value(param_type, content, param_name)
+                            arguments[param_name] = _extract_parameter_value(
+                                param_type, content, param_name
+                            )
 
                         # Create tool call
                         tool_call = ToolCall(
@@ -329,7 +393,9 @@ def apigenmt(
                 "via": "semantic",
                 "tools_injected": injected_count,
             }
-            yield ConversationRecord(messages=new_messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=new_messages, metadata=meta, source=rec.source, id=rec.id
+            )
 
         except Exception as e:
             logger.warning(f"APIGenMT semantic failed for {rec.id}: {e}")
@@ -339,4 +405,6 @@ def apigenmt(
                 "agentic": False,
                 "via": "error",
             }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )

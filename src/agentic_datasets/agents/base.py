@@ -94,7 +94,7 @@ def create_agent(config: AgentConfig, tools: Optional[list] = None) -> Any:
     except ImportError as e:
         logger.error(f"Failed to import Strands SDK: {e}")
         raise ImportError(
-            "Strands SDK is not installed. Run: " "pip install strands-agents strands-agents-tools"
+            "Strands SDK is not installed. Run: pip install strands-agents strands-agents-tools"
         ) from e
 
 

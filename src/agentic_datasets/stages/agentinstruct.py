@@ -98,9 +98,7 @@ def agentinstruct(
         # Optionally select top-N by diversity against original seed
         selected: List[str]
         if keep_top_n is not None:
-            scored = [
-                (c, _jaccard_diversity(c, seed)) for c in unique.values()
-            ]
+            scored = [(c, _jaccard_diversity(c, seed)) for c in unique.values()]
             scored.sort(key=lambda t: t[1], reverse=True)
             selected = [c for c, _ in scored[: max(1, int(keep_top_n))]]
         else:

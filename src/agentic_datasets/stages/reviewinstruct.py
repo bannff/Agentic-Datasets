@@ -70,8 +70,15 @@ def reviewinstruct(
     for rec in records:
         if strands_agent is None:
             # Fallback: mark reviewed, pass-through
-            meta = {**(rec.metadata or {}), "stage": "reviewinstruct", "reviewed": True, "via": "fallback"}
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            meta = {
+                **(rec.metadata or {}),
+                "stage": "reviewinstruct",
+                "reviewed": True,
+                "via": "fallback",
+            }
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )
             continue
 
         try:
@@ -88,8 +95,10 @@ def reviewinstruct(
                 max_iterations=cfg.max_iterations,
             )
             chairman_resp = strands_agent(chairman_user, system_prompt=CHAIRMAN_SYSTEM_PROMPT)
-            chairman_text = getattr(chairman_resp, "text", None) or getattr(chairman_resp, "content", None) or str(
-                chairman_resp
+            chairman_text = (
+                getattr(chairman_resp, "text", None)
+                or getattr(chairman_resp, "content", None)
+                or str(chairman_resp)
             )
             decision = _extract_decision(chairman_text)
 
@@ -101,7 +110,11 @@ def reviewinstruct(
                     "Return ONLY a JSON array of messages with fields role and content."
                 )
                 cand_resp = strands_agent(candidate_prompt, system_prompt=CANDIDATE_SYSTEM_PROMPT)
-                cand_text = getattr(cand_resp, "text", None) or getattr(cand_resp, "content", None) or str(cand_resp)
+                cand_text = (
+                    getattr(cand_resp, "text", None)
+                    or getattr(cand_resp, "content", None)
+                    or str(cand_resp)
+                )
                 try:
                     msgs_data = json.loads(cand_text)
                     messages: list[Message] = []
@@ -137,11 +150,20 @@ def reviewinstruct(
                 "via": "strands",
                 "model": cfg.model_name,
             }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )
         except Exception:
             # Conservative fallback
-            meta = {**(rec.metadata or {}), "stage": "reviewinstruct", "reviewed": True, "via": "fallback"}
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+            meta = {
+                **(rec.metadata or {}),
+                "stage": "reviewinstruct",
+                "reviewed": True,
+                "via": "fallback",
+            }
+            yield ConversationRecord(
+                messages=rec.messages, metadata=meta, source=rec.source, id=rec.id
+            )
 
 
 def _extract_decision(text: str) -> str:

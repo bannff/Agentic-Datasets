@@ -27,12 +27,16 @@ def test_reviewinstruct_strands_accept(monkeypatch: pytest.MonkeyPatch):
     # Mock strands and model imports
     def fake_import_module(name: str):
         if name == "strands":
-            return SimpleNamespace(Agent=lambda model: DummyAgent(["Decision: Accept\nSummary: ok"]))
+            return SimpleNamespace(
+                Agent=lambda model: DummyAgent(["Decision: Accept\nSummary: ok"])
+            )
         if name == "strands.models.ollama":
             return SimpleNamespace(OllamaModel=lambda host, model_id: SimpleNamespace())
         raise ImportError(name)
 
-    monkeypatch.setattr("agentic_datasets.stages.reviewinstruct.importlib.import_module", fake_import_module)
+    monkeypatch.setattr(
+        "agentic_datasets.stages.reviewinstruct.importlib.import_module", fake_import_module
+    )
 
     rec = ConversationRecord(
         messages=[
@@ -51,20 +55,26 @@ def test_reviewinstruct_strands_accept(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_reviewinstruct_strands_refine(monkeypatch: pytest.MonkeyPatch):
-    refined = json.dumps([
-        {"role": "user", "content": "What is CSRF?"},
-        {"role": "assistant", "content": "CSRF is a cross-site request forgery, ..."},
-    ])
+    refined = json.dumps(
+        [
+            {"role": "user", "content": "What is CSRF?"},
+            {"role": "assistant", "content": "CSRF is a cross-site request forgery, ..."},
+        ]
+    )
 
     def fake_import_module(name: str):
         if name == "strands":
             # First call is chairman => Refine; second is candidate => refined JSON
-            return SimpleNamespace(Agent=lambda model: DummyAgent(["Decision: Refine\nPriority fixes: ...", refined]))
+            return SimpleNamespace(
+                Agent=lambda model: DummyAgent(["Decision: Refine\nPriority fixes: ...", refined])
+            )
         if name == "strands.models.ollama":
             return SimpleNamespace(OllamaModel=lambda host, model_id: SimpleNamespace())
         raise ImportError(name)
 
-    monkeypatch.setattr("agentic_datasets.stages.reviewinstruct.importlib.import_module", fake_import_module)
+    monkeypatch.setattr(
+        "agentic_datasets.stages.reviewinstruct.importlib.import_module", fake_import_module
+    )
 
     rec = ConversationRecord(
         messages=[

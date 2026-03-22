@@ -149,7 +149,11 @@ def s2m(
                         params={"temperature": max(0.0, min(1.0, cfg.temperature))},
                     )
                     # Expect JSON array of messages in result.text or result.content
-                    text = getattr(result, "text", None) or getattr(result, "content", None) or str(result)
+                    text = (
+                        getattr(result, "text", None)
+                        or getattr(result, "content", None)
+                        or str(result)
+                    )
                     import json as _json
 
                     msgs_data = _json.loads(text)

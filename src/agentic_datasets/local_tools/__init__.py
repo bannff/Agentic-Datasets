@@ -43,7 +43,5 @@ def dns_lookup(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     args = (payload or {}).get("input", {})
     hostname = str(args.get("hostname", "")).strip() or "example.com"
-    text = (
-        f"DNS lookup for {hostname}:\nA 203.0.113.10\nAAAA 2001:db8::10\nNS ns1.{hostname}\nTXT 'stub-record'"
-    )
+    text = f"DNS lookup for {hostname}:\nA 203.0.113.10\nAAAA 2001:db8::10\nNS ns1.{hostname}\nTXT 'stub-record'"
     return _mk_content(text)
