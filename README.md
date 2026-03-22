@@ -55,6 +55,36 @@ For optimal local testing, run with **Ollama**:
 agentic-datasets run-config examples/pipeline.ollama.yaml
 ```
 
+*Note on Local Ollama*: 
+- Set `OLLAMA_HOST` if your daemon isn't on `http://localhost:11434`.
+- The `S2M` stage prefers a Strands Agent with OllamaModel. If Strands isn't installed, it falls back to a direct Ollama HTTP call cleanly.
+
+### 📚 CLI Reference Overview
+
+- `agentic-datasets run`: Ingest -> normalize -> validate -> export
+- `agentic-datasets chunk`: Token-aware chunking of a JSONL dataset
+- `agentic-datasets run-config`: Run a YAML pipeline spec with registered transforms
+- `agentic-datasets transforms`: List available transforms
+- `agentic-datasets catalog:list`, `catalog:show`: Inspect dataset catalog
+- `agentic-datasets hf:push`: Push a JSONL dataset to Hugging Face with dataset card from catalog
+- `agentic-datasets metrics`: Summarize tool_calls, tool messages, and backend/via metrics
+- `agentic-datasets doctor`: Environment diagnostics for Strands/Ollama/tools
+
+### 🛠️ Key Pipeline Feature: APIGenMT (Tool-Call Injection)
+
+- `APIGenMT` uses a Strands-first path similar to S2M. It formats the current conversation and a tools catalog via prompts in `src/agentic_datasets/agents/prompts.py`, calls a Strands Agent backed by Ollama, then parses the returned JSON into a strict `Message` schema.
+- If Strands or the model isn't available, it falls back gracefully by tagging metadata and passing messages through unchanged.
+- Provide a tools catalog via the stage config (`tools: [...]`) to guide which functions can be injected.
+- Fully compatible with Model Context Protocol (MCP) integrations.
+
+### ⚙️ Self-Hosted CI Runner (Ollama)
+If you require model-backed stages (e.g., S2M with Ollama) executed natively in CI:
+1. Create a self-hosted runner matching label `ollama`.
+2. Pre-pull models on the runner cache (`ollama pull qwen3:8b`).
+3. Trigger `.github/workflows/self_hosted_ollama.yml` to execute end-to-end dataset builds and output verified JSONL artifacts.
+
+For fast PR feedback without model footprints, `.github/workflows/smoke_hosted.yml` runs deterministically on standard GitHub-hosted UI runners.
+
 ---
 
 ## 🛡️ Professional Governance
@@ -64,7 +94,8 @@ This repository adheres to the highest level of AI-native engineering standards:
 - **Development Principles**: Strict enforcement of SRP, Clean Architecture, and <200 LOC limits.
 - **Licensing**: **Business Source License 1.1** (Transitions to Apache 2.0 in 2030).
 
-For detailed contributor guidelines and agent steering instructions, please see [AGENTS.md](AGENTS.md).
+For detailed contributor guidelines and agent steering instructions, please see [AGENTS.md](AGENTS.md).  
+For extensive documentation on the orchestration SDK utilized internally, refer to the [Strands SDK Reference](docs/STRANDS_REFERENCE.md).
 
 ---
 <div align="center">
