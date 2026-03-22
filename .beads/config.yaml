@@ -1,0 +1,11 @@
+# Beads configuration
+version: 1
+project: datasets
+settings:
+  default_priority: 2
+  allowed_types: 
+    - bug
+    - feature
+    - task
+    - epic
+    - chore
