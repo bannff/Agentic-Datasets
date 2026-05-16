@@ -1,3 +1,6 @@
+"""Tests for tool-call schema handling."""
+# mypy: ignore-errors
+
 from agentic_datasets.schemas.messages import Message, ConversationRecord, ToolCall
 
 

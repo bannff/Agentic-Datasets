@@ -112,7 +112,9 @@ def doctor():
     
     # Check LiteLLM and LLM provider
     try:
-        import litellm  # type: ignore
+        import importlib
+
+        importlib.import_module("litellm")
         report["imports"]["litellm"] = True
         
         # Try to validate the configured provider
@@ -133,14 +135,16 @@ def doctor():
     
     # Check Strands imports
     try:
-        import strands  # type: ignore
+        import importlib
 
+        importlib.import_module("strands")
         report["imports"]["strands"] = True
     except Exception as e:
         report["imports"]["strands"] = f"Error: {e}"
     try:
-        import strands.models.ollama as ollama  # type: ignore
+        import importlib
 
+        importlib.import_module("strands.models.ollama")
         report["imports"]["strands.models.ollama"] = True
     except Exception as e:
         report["imports"]["strands.models.ollama"] = f"Error: {e}"
@@ -151,16 +155,16 @@ def doctor():
     
     # Try resolving a couple known tools by name
     try:
-        from .local_tools import search_cve, dns_lookup  # type: ignore
+        import importlib
 
+        importlib.import_module(".local_tools", package=__package__)
         report["tools_resolution"]["local_tools"] = True
     except Exception as e:
         report["tools_resolution"]["local_tools"] = f"Error: {e}"
     try:
         import importlib
 
-        st = importlib.import_module("strands_tools")
-        hasattr(st, "search_cve")
+        importlib.import_module("strands_tools")
         report["tools_resolution"]["strands_tools"] = True
     except Exception as e:
         report["tools_resolution"]["strands_tools"] = f"Error: {e}"

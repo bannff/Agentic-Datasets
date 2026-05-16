@@ -1,3 +1,6 @@
+"""APIGenMT Strands path tests."""
+# mypy: ignore-errors
+
 from __future__ import annotations
 
 import importlib

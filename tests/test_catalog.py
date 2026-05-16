@@ -1,3 +1,6 @@
+"""Catalog behavior tests."""
+# mypy: ignore-errors
+
 from pathlib import Path
 
 from agentic_datasets.catalog import load_catalog, make_dataset_card

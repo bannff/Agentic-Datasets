@@ -2,6 +2,8 @@
 
 Config-driven pipelines for building agentic, multi-turn datasets with validation, optional tool-call execution, and Hugging Face publishing. Includes a Typer CLI, tests, CI workflows, and Docker.
 
+License: Business Source License 1.1. See [LICENSE](LICENSE) for the full text and Change Date.
+
 Badges (workflows may vary by fork):
 - CI: .github/workflows/ci.yml
 - Smoke (hosted): .github/workflows/smoke_hosted.yml
