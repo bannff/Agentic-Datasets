@@ -11,10 +11,10 @@ from unittest.mock import patch
 from typing import Any, Callable, Dict, List
 
 from agentic_datasets.schemas.messages import ConversationRecord, Message
-from agentic_datasets.stages.agentinstruct_v2 import agentinstruct
-from agentic_datasets.stages.s2m_v2 import s2m as single_to_multi
-from agentic_datasets.stages.reviewinstruct_v2 import reviewinstruct
-from agentic_datasets.stages.apigenmt_v2 import apigenmt
+from agentic_datasets.stages.agentinstruct import agentinstruct
+from agentic_datasets.stages.s2m import s2m as single_to_multi
+from agentic_datasets.stages.reviewinstruct import reviewinstruct
+from agentic_datasets.stages.apigenmt import apigenmt
 
 
 def _make_single_turn(user_content: str = "Explain SQL injection") -> ConversationRecord:
@@ -218,7 +218,7 @@ class TestV2WithMockedLLM:
 
     def test_agentinstruct_with_mocked_llm(self, mock_llm_response: Callable[..., str]) -> None:
         """Test agentinstruct with mocked LLM responses."""
-        with patch("agentic_datasets.stages.agentinstruct_v2.get_completion", mock_llm_response):
+        with patch("agentic_datasets.stages.agentinstruct.get_completion", mock_llm_response):
             rec = _make_single_turn()
             out: List[ConversationRecord] = list(agentinstruct([rec], k_variants=2, use_llm=True))
 

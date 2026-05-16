@@ -16,9 +16,17 @@ output: {tmp_path / "out.jsonl"}
 orchestrator: strands
 stages:
   - name: agentinstruct
+    params:
+      use_llm: false
   - name: s2m
+    params:
+      use_llm: false
   - name: apigenmt
+    params:
+      use_llm: false
   - name: reviewinstruct
+    params:
+      use_llm: false
 """.strip()
     )
     spec = load_spec(cfg)
