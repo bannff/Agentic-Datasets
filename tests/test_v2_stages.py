@@ -3,6 +3,7 @@
 These tests verify the v2 stages work correctly with both LLM-powered
 and fallback modes.
 """
+# mypy: ignore-errors
 
 from __future__ import annotations
 

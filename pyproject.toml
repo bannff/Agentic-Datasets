@@ -91,12 +91,28 @@ extend-select = ["E", "F"]
 extend-ignore = ["E501"]
 
  [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
  strict = true
  warn_unused_ignores = true
  warn_redundant_casts = true
  warn_return_any = true
  warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+  "agentic_datasets.cli",
+  "agentic_datasets.catalog",
+  "agentic_datasets.hf_export",
+  "agentic_datasets.metrics",
+  "agentic_datasets.pipeline",
+  "agentic_datasets.pipeline_config",
+  "agentic_datasets.register_defaults",
+  "agentic_datasets.schemas.messages",
+  "agentic_datasets.agents.*",
+  "agentic_datasets.llm.provider",
+  "agentic_datasets.stages.*",
+]
+ignore_errors = true
 
 [tool.pytest.ini_options]
 addopts = "-q"

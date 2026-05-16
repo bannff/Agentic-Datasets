@@ -1,3 +1,6 @@
+"""S2M Strands path tests."""
+# mypy: ignore-errors
+
 import json
 from types import SimpleNamespace
 

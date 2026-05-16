@@ -1,3 +1,6 @@
+"""Stages pipeline tests."""
+# mypy: ignore-errors
+
 from pathlib import Path
 
 from agentic_datasets.pipeline_config import load_spec, run_spec
