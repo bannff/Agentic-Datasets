@@ -10,7 +10,7 @@
  authors = [
    { name = "Daniel Rodrigo" }
  ]
- license = { text = "BSL-1.1" }
+ license = { text = "Business Source License 1.1" }
 requires-python = ">=3.9"
  dependencies = [
    "typer>=0.12",
