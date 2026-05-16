@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 import typer
 
@@ -27,7 +27,7 @@ def run(
     input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
     output_path: Path = typer.Argument(..., help="Output JSONL file"),
     max_records: Optional[int] = typer.Option(None, help="Limit number of records (debug)"),
-):
+) -> None:
     cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=max_records)
     out = run_pipeline(cfg)
     typer.echo(f"Wrote: {out}")
@@ -37,7 +37,7 @@ def run(
 def validate(
     input_path: Path = typer.Argument(..., help="Input JSONL file or directory of JSONL files"),
     max_records: Optional[int] = typer.Option(10, help="Validate N records (default: 10)"),
-):
+) -> None:
     # Reuse pipeline's initial steps to validate structure by attempting normalization only
     cfg = PipelineConfig(
         input_path=input_path, output_path=Path("/dev/null"), max_records=max_records
@@ -57,7 +57,7 @@ def chunk(
     model_name: str = typer.Option("gpt-4o-mini", help="Model encoding name for tokenization"),
     max_tokens: int = typer.Option(512, help="Max tokens per chunk"),
     overlap: int = typer.Option(50, help="Token overlap between chunks"),
-):
+) -> None:
     cfg = PipelineConfig(input_path=input_path, output_path=output_path, max_records=None)
     recs = normalize(ingest(cfg.input_path))
     chunked = chunk_dataset(recs, model_name=model_name, max_tokens=max_tokens, overlap=overlap)
@@ -68,7 +68,7 @@ def chunk(
 @app.command()
 def run_config(
     config_path: Path = typer.Argument(..., help="YAML pipeline config file"),
-):
+) -> None:
     spec = load_spec(config_path)
     # run_spec handles max_records inside spec
     out = run_spec(spec)
@@ -76,7 +76,7 @@ def run_config(
 
 
 @app.command()
-def transforms():
+def transforms() -> None:
     names = sorted(registry.list().keys())
     for n in names:
         typer.echo(n)
@@ -86,22 +86,26 @@ def transforms():
 def metrics(
     data: Path = typer.Argument(..., help="Path to a JSONL output to summarize"),
     limit: Optional[int] = typer.Option(None, help="Limit number of records for quick summary"),
-):
+) -> None:
     """Summarize tool_calls, tool messages, backends, and via flags from a JSONL file."""
     res = summarize_metrics(data, limit=limit)
     typer.echo(res)
 
 
 @app.command()
-def doctor():
+def doctor() -> None:
     """Check environment for LLM/Strands/Ollama/tools readiness."""
-    report = {
+    report: dict[str, dict[str, Any]] = {
         "python": {
             "version": f"{typer.__version__}",
         },
         "env": {
-            "AGENTIC_LLM_MODEL": os.getenv("AGENTIC_LLM_MODEL", "<unset, default: ollama/qwen3:8b>"),
-            "AGENTIC_LLM_TEMPERATURE": os.getenv("AGENTIC_LLM_TEMPERATURE", "<unset, default: 0.7>"),
+            "AGENTIC_LLM_MODEL": os.getenv(
+                "AGENTIC_LLM_MODEL", "<unset, default: ollama/qwen3:8b>"
+            ),
+            "AGENTIC_LLM_TEMPERATURE": os.getenv(
+                "AGENTIC_LLM_TEMPERATURE", "<unset, default: 0.7>"
+            ),
             "OLLAMA_HOST": os.getenv("OLLAMA_HOST", "<unset, default: http://localhost:11434>"),
             "AGENTIC_TOOLS_BACKENDS": os.getenv("AGENTIC_TOOLS_BACKENDS", "<unset>"),
         },
@@ -109,15 +113,15 @@ def doctor():
         "imports": {},
         "tools_resolution": {},
     }
-    
+
     # Check LiteLLM and LLM provider
     try:
-        import litellm  # type: ignore
         report["imports"]["litellm"] = True
-        
+
         # Try to validate the configured provider
         try:
             from .llm import validate_provider, get_default_config
+
             cfg = get_default_config()
             report["llm"]["configured_model"] = cfg.model
             result = validate_provider()
@@ -130,29 +134,27 @@ def doctor():
     except Exception as e:
         report["imports"]["litellm"] = f"Error: {e}"
         report["llm"]["error"] = "LiteLLM not installed"
-    
+
     # Check Strands imports
     try:
-        import strands  # type: ignore
-
         report["imports"]["strands"] = True
     except Exception as e:
         report["imports"]["strands"] = f"Error: {e}"
     try:
-        import strands.models.ollama as ollama  # type: ignore
-
         report["imports"]["strands.models.ollama"] = True
     except Exception as e:
         report["imports"]["strands.models.ollama"] = f"Error: {e}"
-    
+
     # Tools backends order
-    backends = [b.strip() for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands,local").split(",") if b.strip()]
+    backends = [
+        b.strip()
+        for b in os.getenv("AGENTIC_TOOLS_BACKENDS", "strands,local").split(",")
+        if b.strip()
+    ]
     report["tools_resolution"]["backend_order"] = backends
-    
+
     # Try resolving a couple known tools by name
     try:
-        from .local_tools import search_cve, dns_lookup  # type: ignore
-
         report["tools_resolution"]["local_tools"] = True
     except Exception as e:
         report["tools_resolution"]["local_tools"] = f"Error: {e}"
@@ -164,14 +166,14 @@ def doctor():
         report["tools_resolution"]["strands_tools"] = True
     except Exception as e:
         report["tools_resolution"]["strands_tools"] = f"Error: {e}"
-    
+
     typer.echo(json.dumps(report, indent=2))
 
 
 @app.command("catalog:list")
 def catalog_list(
     catalog: str = typer.Argument("catalog.yaml", help="Path to catalog YAML"),
-):
+) -> None:
     """List catalog entries."""
     cat = load_catalog(Path(catalog))
     for e in cat.entries:
@@ -179,7 +181,7 @@ def catalog_list(
 
 
 @app.command("catalog:show")
-def catalog_show(entry_id: str, catalog: str = typer.Argument("catalog.yaml")):
+def catalog_show(entry_id: str, catalog: str = typer.Argument("catalog.yaml")) -> None:
     """Show a catalog entry details."""
     cat = load_catalog(Path(catalog))
     e = cat.get(entry_id)
@@ -193,7 +195,7 @@ def hf_push(
     data: str = typer.Argument(..., help="Path to JSONL to push"),
     catalog: str = typer.Option("catalog.yaml", help="Path to catalog YAML"),
     private: bool = typer.Option(False, help="Create private repo"),
-):
+) -> None:
     """Push a dataset JSONL file to Hugging Face Hub, with dataset card from catalog."""
     from .catalog import make_dataset_card, load_catalog
 

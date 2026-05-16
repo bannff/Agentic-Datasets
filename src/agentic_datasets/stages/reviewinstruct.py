@@ -1,165 +1,307 @@
+"""ReviewInstruct Stage: LLM-powered multi-agent review.
+
+Uses LLM reasoning to evaluate conversations and optionally refine them
+based on quality, accuracy, and usefulness criteria.
+"""
+
 from __future__ import annotations
 
-import importlib
 import json
-import os
-from typing import Iterable, Iterator, Optional
+import logging
+from typing import Any, Dict, Iterable, Iterator, List, Optional
 
+from ..llm import LLMConfig, get_completion, get_default_config
+from ..llm.prompts import CHAIRMAN_SYSTEM, CHAIRMAN_REVIEW, REFINER_SYSTEM, REFINER_IMPROVE
 from ..schemas.messages import ConversationRecord, Message
-from ..agents.prompts import (
-    CANDIDATE_SYSTEM_PROMPT,
-    CHAIRMAN_SYSTEM_PROMPT,
-    CHAIRMAN_USER_TEMPLATE,
-    format_conversation_for_review,
-)
+
+logger = logging.getLogger(__name__)
 
 
-class ReviewInstructConfig:
-    def __init__(
-        self,
-        provider: str = "ollama",
-        model_name: Optional[str] = None,
-        max_iterations: int = 1,
-        enabled: bool = True,
-    ) -> None:
-        self.provider = provider
-        self.model_name = model_name or ("qwen3:8b" if provider == "ollama" else None)
-        self.max_iterations = max(1, int(max_iterations))
-        self.enabled = enabled
+def _format_conversation(messages: List[Message]) -> str:
+    """Format messages for review."""
+    lines: List[str] = []
+    for msg in messages:
+        role = msg.role.upper()
+        content = msg.content
+
+        if msg.tool_calls:
+            tools = ", ".join(tc.name for tc in msg.tool_calls)
+            lines.append(f"{role}: {content}\n  [Calls: {tools}]")
+        elif msg.role == "tool":
+            lines.append(f"TOOL ({msg.tool_name}): {content}")
+        else:
+            lines.append(f"{role}: {content}")
+
+    return "\n\n".join(lines)
+
+
+def _parse_review(text: str) -> Optional[Dict[str, Any]]:
+    """Parse review JSON from LLM response."""
+    text = text.strip()
+
+    # Try direct parse
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Try to extract from code blocks
+    for marker in ["```json", "```"]:
+        if marker in text:
+            start = text.find(marker) + len(marker)
+            end = text.find("```", start)
+            if end > start:
+                try:
+                    return json.loads(text[start:end].strip())
+                except json.JSONDecodeError:
+                    pass
+
+    # Try to find JSON object
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        try:
+            return json.loads(text[start : end + 1])
+        except json.JSONDecodeError:
+            pass
+
+    return None
+
+
+def _parse_messages(text: str) -> Optional[List[Dict[str, str]]]:
+    """Parse messages JSON from refiner response."""
+    text = text.strip()
+
+    # Try direct parse
+    try:
+        data: List[Dict[str, str]] = json.loads(text)
+        if isinstance(data, list):
+            return data
+    except json.JSONDecodeError:
+        pass
+
+    # Try to extract from code blocks
+    for marker in ["```json", "```"]:
+        if marker in text:
+            start = text.find(marker) + len(marker)
+            end = text.find("```", start)
+            if end > start:
+                try:
+                    data = json.loads(text[start:end].strip())
+                    if isinstance(data, list):
+                        return data
+                except json.JSONDecodeError:
+                    pass
+
+    # Try to find array
+    start = text.find("[")
+    end = text.rfind("]")
+    if start >= 0 and end > start:
+        try:
+            data = json.loads(text[start : end + 1])
+            if isinstance(data, list):
+                return data
+        except json.JSONDecodeError:
+            pass
+
+    return None
+
+
+def _review_conversation(
+    messages: List[Message],
+    config: LLMConfig,
+) -> Dict[str, Any]:
+    """Get quality review from LLM chairman.
+
+    Returns:
+        Dict with decision, scores, strengths, issues, guidance
+    """
+    conversation = _format_conversation(messages)
+
+    prompt = CHAIRMAN_REVIEW.format(conversation=conversation)
+
+    try:
+        response = get_completion(
+            prompt,
+            system_prompt=CHAIRMAN_SYSTEM,
+            config=config,
+            temperature=0.3,  # Lower for consistent judgment
+            max_tokens=1024,
+        )
+
+        review = _parse_review(response)
+        if review and "decision" in review:
+            return review
+
+        # Default to accept if parsing fails
+        return {"decision": "accept", "overall_score": 3, "issues": ["Parse failed"]}
+
+    except Exception as e:
+        logger.warning(f"Review failed: {e}")
+        return {"decision": "accept", "overall_score": 3, "issues": [str(e)]}
+
+
+def _refine_conversation(
+    messages: List[Message],
+    feedback: Dict[str, Any],
+    config: LLMConfig,
+) -> Optional[List[Message]]:
+    """Refine conversation based on review feedback.
+
+    Returns:
+        List of improved Message objects or None on failure
+    """
+    conversation = _format_conversation(messages)
+
+    issues = feedback.get("issues", [])
+    guidance = feedback.get("refinement_guidance", "Improve clarity and completeness")
+
+    prompt = REFINER_IMPROVE.format(
+        conversation=conversation,
+        feedback=json.dumps(issues),
+        guidance=guidance,
+    )
+
+    try:
+        response = get_completion(
+            prompt,
+            system_prompt=REFINER_SYSTEM,
+            config=config,
+            temperature=0.6,
+            max_tokens=2048,
+        )
+
+        messages_data = _parse_messages(response)
+        if not messages_data:
+            return None
+
+        result: List[Message] = []
+        for m in messages_data:
+            role = m.get("role", "").strip()
+            content = m.get("content", "").strip()
+            if role in ("user", "assistant", "system", "tool") and content:
+                result.append(Message(role=role, content=content))
+
+        if len(result) >= 2:
+            return result
+        return None
+
+    except Exception as e:
+        logger.warning(f"Refinement failed: {e}")
+        return None
 
 
 def reviewinstruct(
-    records: Iterable[ConversationRecord], config: Optional[ReviewInstructConfig | dict] = None
+    records: Iterable[ConversationRecord],
+    *,
+    accept_threshold: float = 3.5,
+    max_iterations: int = 2,
+    use_llm: bool = True,
+    llm_config: Optional[Dict[str, Any]] = None,
+    config: Optional[Dict[str, Any]] = None,  # Legacy
 ) -> Iterator[ConversationRecord]:
-    """ReviewInstruct: lightweight review-and-refine pass (Strands-first).
+    """Review and optionally refine conversations using LLM.
 
-    Strategy:
-    - Prefer a Strands Agent with Ollama model when available (dynamic import)
-    - Ask a chairman to decide Accept vs Refine based on the current conversation
-    - If Refine, ask candidate to produce a refined conversation (JSON array of messages)
-    - Fallback: pass-through, set reviewed metadata
+    Uses a chairman agent to evaluate quality, and a refiner agent
+    to improve conversations that don't meet the quality threshold.
+
+    Args:
+        records: Input conversation records
+        accept_threshold: Minimum score to accept (1-5 scale, default 3.5)
+        max_iterations: Maximum refinement attempts
+        use_llm: Whether to use LLM (False = pass through)
+        llm_config: LLM configuration override
+        config: Legacy config parameter
+
+    Yields:
+        Reviewed (and possibly refined) conversation records
     """
+    # Handle legacy config
+    if config and not llm_config:
+        llm_config = config
 
-    # Coerce config
-    if config is None:
-        cfg = ReviewInstructConfig()
-    elif isinstance(config, dict):
-        cfg = ReviewInstructConfig(**config)
-    else:
-        cfg = config
+    cfg = LLMConfig(**(llm_config or {})) if llm_config else get_default_config()
 
-    if not cfg.enabled:
-        for rec in records:
-            yield rec
-        return
-
-    # Try to configure a Strands Agent with Ollama model if provider is ollama
-    strands_agent = None
-    if cfg.provider.lower() == "ollama":
-        try:
-            strands_module = importlib.import_module("strands")
-            ollama_module = importlib.import_module("strands.models.ollama")
-            Agent = getattr(strands_module, "Agent")
-            OllamaModel = getattr(ollama_module, "OllamaModel")
-            host = os.getenv("OLLAMA_HOST") or "http://localhost:11434"
-            model = OllamaModel(host=host, model_id=cfg.model_name or "qwen3:8b")
-            strands_agent = Agent(model=model)
-        except Exception:
-            strands_agent = None
+    logger.info(f"ReviewInstruct: threshold={accept_threshold}, max_iter={max_iterations}")
+    if use_llm:
+        logger.info(f"Using LLM: {cfg.model}")
 
     for rec in records:
-        if strands_agent is None:
-            # Fallback: mark reviewed, pass-through
-            meta = {**(rec.metadata or {}), "stage": "reviewinstruct", "reviewed": True, "via": "fallback"}
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
+        if not use_llm:
+            disabled_meta: Dict[str, Any] = dict(rec.metadata or {})
+            disabled_meta.update(
+                {
+                    "stage": "reviewinstruct",
+                    "reviewed": False,
+                    "via": "disabled",
+                }
+            )
+            yield ConversationRecord(
+                messages=rec.messages,
+                metadata=disabled_meta,
+                source=rec.source,
+                id=rec.id,
+            )
             continue
 
         try:
-            conv_text = format_conversation_for_review(rec.messages)
+            current_messages = rec.messages
+            review: Optional[Dict[str, Any]] = None
+            iteration = 0
 
-            # Ask chairman for decision
-            chairman_user = CHAIRMAN_USER_TEMPLATE.format(
-                conversation_id=rec.id or "unknown",
-                quality_feedback="",
-                safety_feedback="",
-                diversity_feedback="",
-                coherence_feedback="",
-                iteration=1,
-                max_iterations=cfg.max_iterations,
+            while iteration < max_iterations:
+                # Get review
+                review = _review_conversation(current_messages, cfg)
+
+                score = review.get("overall_score", 3)
+                decision = review.get("decision", "accept")
+
+                # Check if acceptable
+                if decision == "accept" or score >= accept_threshold:
+                    break
+
+                # Try to refine
+                refined = _refine_conversation(current_messages, review, cfg)
+                if refined:
+                    current_messages = refined
+                    iteration += 1
+                else:
+                    # Refinement failed, accept as-is
+                    break
+
+            success_meta: Dict[str, Any] = dict(rec.metadata or {})
+            success_meta.update(
+                {
+                    "stage": "reviewinstruct",
+                    "reviewed": True,
+                    "via": "llm",
+                    "model": cfg.model,
+                    "decision": review.get("decision", "accept") if review else "accept",
+                    "score": review.get("overall_score", 3) if review else 3,
+                    "iterations": iteration,
+                }
             )
-            chairman_resp = strands_agent(chairman_user, system_prompt=CHAIRMAN_SYSTEM_PROMPT)
-            chairman_text = getattr(chairman_resp, "text", None) or getattr(chairman_resp, "content", None) or str(
-                chairman_resp
+
+            yield ConversationRecord(
+                messages=current_messages,
+                metadata=success_meta,
+                source=rec.source,
+                id=rec.id,
             )
-            decision = _extract_decision(chairman_text)
 
-            if decision == "refine" and cfg.max_iterations > 0:
-                # Ask candidate to refine; include conversation for context and hints from chairman
-                candidate_prompt = (
-                    f"Conversation to refine:\n\n{conv_text}\n\n"
-                    f"Chairman guidance:\n{chairman_text}\n\n"
-                    "Return ONLY a JSON array of messages with fields role and content."
-                )
-                cand_resp = strands_agent(candidate_prompt, system_prompt=CANDIDATE_SYSTEM_PROMPT)
-                cand_text = getattr(cand_resp, "text", None) or getattr(cand_resp, "content", None) or str(cand_resp)
-                try:
-                    msgs_data = json.loads(cand_text)
-                    messages: list[Message] = []
-                    for m in msgs_data:
-                        role = m.get("role")
-                        content = (m.get("content") or "").strip()
-                        if not role or not content:
-                            continue
-                        messages.append(Message(role=role, content=content))
-                    if messages:
-                        yield ConversationRecord(
-                            messages=messages,
-                            metadata={
-                                **(rec.metadata or {}),
-                                "stage": "reviewinstruct",
-                                "decision": "refine",
-                                "via": "strands",
-                                "model": cfg.model_name,
-                            },
-                            source=rec.source,
-                            id=rec.id,
-                        )
-                        continue
-                except Exception:
-                    # Fall through to accept-as-is if parsing failed
-                    pass
-
-            # Accept path or failed refine parsing: pass-through with metadata
-            meta = {
-                **(rec.metadata or {}),
-                "stage": "reviewinstruct",
-                "decision": "accept" if decision == "accept" else "unknown",
-                "via": "strands",
-                "model": cfg.model_name,
-            }
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
-        except Exception:
-            # Conservative fallback
-            meta = {**(rec.metadata or {}), "stage": "reviewinstruct", "reviewed": True, "via": "fallback"}
-            yield ConversationRecord(messages=rec.messages, metadata=meta, source=rec.source, id=rec.id)
-
-
-def _extract_decision(text: str) -> str:
-    t = text.strip().lower()
-    if "decision:" in t:
-        # find after 'decision:'
-        try:
-            part = t.split("decision:", 1)[1].strip()
-            word = part.splitlines()[0].strip()
-            if word.startswith("accept"):
-                return "accept"
-            if word.startswith("refine"):
-                return "refine"
-        except Exception:
-            pass
-    # heuristic
-    if "accept" in t and "refine" not in t:
-        return "accept"
-    if "refine" in t:
-        return "refine"
-    return "unknown"
+        except Exception as e:
+            logger.warning(f"ReviewInstruct failed for {rec.id}: {e}")
+            error_meta: Dict[str, Any] = dict(rec.metadata or {})
+            error_meta.update(
+                {
+                    "stage": "reviewinstruct",
+                    "reviewed": False,
+                    "via": "error",
+                }
+            )
+            yield ConversationRecord(
+                messages=rec.messages,
+                metadata=error_meta,
+                source=rec.source,
+                id=rec.id,
+            )

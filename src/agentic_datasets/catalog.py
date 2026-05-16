@@ -42,14 +42,14 @@ def make_dataset_card(entry: CatalogEntry) -> str:
     body = f"""
 ---
 language: en
-license: {entry.license or 'other'}
+license: {entry.license or "other"}
 tags:
 {tags}
 ---
 
 # {entry.name} (v{entry.version})
 
-{entry.description or ''}
+{entry.description or ""}
 
 This dataset is part of the Agentic Datasets pipeline. See repository for pipeline config and provenance.
 """.strip()

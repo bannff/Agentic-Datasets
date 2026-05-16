@@ -26,13 +26,15 @@ def run_strands_pipeline(
     def _maybe_exec_tool(tool_call: ToolCall) -> Message | None:
         """Try to execute a tool_call using configured backends.
 
-    Backend order is controlled by env AGENTIC_TOOLS_BACKENDS (comma-separated),
-    defaulting to "strands" (strict). Returns a tool message on success; None if no backend resolves.
+        Backend order is controlled by env AGENTIC_TOOLS_BACKENDS (comma-separated),
+        defaulting to "strands" (strict). Returns a tool message on success; None if no backend resolves.
         """
         env_backends = os.getenv("AGENTIC_TOOLS_BACKENDS")
         backend_order = [
             b.strip()
-            for b in (env_backends if env_backends is not None else "strands,local").lower().split(",")
+            for b in (env_backends if env_backends is not None else "strands,local")
+            .lower()
+            .split(",")
             if b.strip()
         ]
         # Always include 'local' as last-resort fallback for deterministic stub tools
@@ -80,14 +82,24 @@ def run_strands_pipeline(
             if isinstance(result, dict):
                 result = {**result, "backend": backend_used or "unknown", "ok": True}
             output_text = "\n".join(
-                [c.get("text", "") for c in (result.get("content", []) if isinstance(result, dict) else [])]
+                [
+                    c.get("text", "")
+                    for c in (result.get("content", []) if isinstance(result, dict) else [])
+                ]
             )
             return Message(
                 role="tool",
                 content=output_text or "",
                 tool_name=tool_call.name,
                 tool_call_id=tool_call.id,
-                tool_output=result if isinstance(result, dict) else {"backend": backend_used or "unknown", "content": [], "raw": str(result), "ok": True},
+                tool_output=result
+                if isinstance(result, dict)
+                else {
+                    "backend": backend_used or "unknown",
+                    "content": [],
+                    "raw": str(result),
+                    "ok": True,
+                },
             )
         except Exception as e:
             return Message(
@@ -95,7 +107,12 @@ def run_strands_pipeline(
                 content=f"tool {tool_call.name} failed: {e}",
                 tool_name=tool_call.name,
                 tool_call_id=tool_call.id,
-                tool_output={"status": "error", "error": str(e), "backend": backend_used or "unknown", "ok": False},
+                tool_output={
+                    "status": "error",
+                    "error": str(e),
+                    "backend": backend_used or "unknown",
+                    "ok": False,
+                },
             )
 
     def _inject_tool_messages(stream: Iterable[ConversationRecord]) -> Iterator[ConversationRecord]:

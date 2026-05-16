@@ -26,7 +26,7 @@ _default_config: Optional[LLMConfig] = None
 @dataclass
 class LLMConfig:
     """Configuration for LLM provider.
-    
+
     Model format follows LiteLLM convention: "provider/model_name"
     Examples:
         - "ollama/qwen3:8b" (local Ollama)
@@ -34,23 +34,21 @@ class LLMConfig:
         - "anthropic/claude-4-sonnet-20250514" (Anthropic)
         - "bedrock/anthropic.claude-v2" (AWS Bedrock)
         - "together_ai/mistralai/Mixtral-8x7B" (Together AI)
-    
+
     LiteLLM Best Practices Applied:
         - num_retries: Automatic retry on transient failures (default: 2)
         - fallbacks: List of backup models if primary fails
         - timeout: Prevent hanging requests (default: 120s)
     """
-    
-    model: str = field(default_factory=lambda: os.getenv(
-        "AGENTIC_LLM_MODEL", "ollama/qwen3:8b"
-    ))
+
+    model: str = field(default_factory=lambda: os.getenv("AGENTIC_LLM_MODEL", "ollama/qwen3:8b"))
     temperature: float = 0.7
     max_tokens: int = 4096
     api_base: Optional[str] = None  # Override for custom endpoints
     timeout: int = 120
     num_retries: int = 2  # LiteLLM best practice: retry on transient failures
     fallbacks: Optional[list[str]] = None  # Backup models if primary fails
-    
+
     def __post_init__(self) -> None:
         # Auto-detect Ollama host
         if self.model.startswith("ollama/") and self.api_base is None:
@@ -73,18 +71,14 @@ def set_default_config(config: LLMConfig) -> None:
 
 def validate_provider(config: Optional[LLMConfig] = None) -> dict[str, Any]:
     """Validate that the configured provider is accessible.
-    
+
     Returns:
         Dict with 'ok' bool and 'message' or 'error' string
     """
     cfg = config or get_default_config()
-    
+
     try:
-        response = get_completion(
-            "Say 'ok' and nothing else.",
-            config=cfg,
-            max_tokens=10
-        )
+        response = get_completion("Say 'ok' and nothing else.", config=cfg, max_tokens=10)
         return {"ok": True, "message": f"Provider {cfg.model} is accessible", "response": response}
     except Exception as e:
         return {"ok": False, "error": str(e), "model": cfg.model}
@@ -100,7 +94,7 @@ def get_completion(
     response_format: Optional[dict[str, Any]] = None,
 ) -> str:
     """Get a completion from the configured LLM.
-    
+
     Args:
         prompt: The user prompt
         system_prompt: Optional system prompt
@@ -108,10 +102,10 @@ def get_completion(
         max_tokens: Override max tokens
         temperature: Override temperature
         response_format: Optional response format (e.g., {"type": "json_object"})
-    
+
     Returns:
         The LLM response text
-    
+
     Raises:
         ImportError: If litellm is not installed
         Exception: If LLM call fails
@@ -122,15 +116,15 @@ def get_completion(
         raise ImportError(
             "LiteLLM is required for LLM operations. Install with: pip install litellm"
         ) from e
-    
+
     cfg = config or get_default_config()
-    
+
     # Build messages
     messages: list[dict[str, str]] = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
-    
+
     # Build kwargs
     kwargs: dict[str, Any] = {
         "model": cfg.model,
@@ -140,22 +134,22 @@ def get_completion(
         "timeout": cfg.timeout,
         "num_retries": cfg.num_retries,  # LiteLLM built-in retry
     }
-    
+
     # Add api_base for Ollama or custom endpoints
     if cfg.api_base:
         kwargs["api_base"] = cfg.api_base
-    
+
     # Add fallback models if configured (LiteLLM best practice)
     if cfg.fallbacks:
         kwargs["fallbacks"] = cfg.fallbacks
-    
+
     # Add response format if requested
     if response_format:
         kwargs["response_format"] = response_format
-    
+
     # Suppress litellm's verbose logging
     litellm.suppress_debug_info = True  # type: ignore[attr-defined]
-    
+
     try:
         response: Any = litellm.completion(**kwargs)  # type: ignore[attr-defined]
         # Extract content from response (type: ignore due to dynamic litellm types)
@@ -175,49 +169,51 @@ def get_completion_with_schema(
     max_retries: int = 2,
 ) -> _T:
     """Get a structured completion that validates against a Pydantic schema.
-    
+
     Args:
         prompt: The user prompt
         schema: Pydantic model class to validate response against
         system_prompt: Optional system prompt
         config: LLM configuration
         max_retries: Number of retries on parse failure
-    
+
     Returns:
         Validated Pydantic model instance
-    
+
     Raises:
         ValueError: If response cannot be parsed after retries
     """
     cfg = config or get_default_config()
-    
+
     # Add JSON instruction to system prompt
     schema_json: dict[str, Any] = schema.model_json_schema()
-    json_instruction = f"\n\nRespond with valid JSON matching this schema:\n{json.dumps(schema_json, indent=2)}"
-    
+    json_instruction = (
+        f"\n\nRespond with valid JSON matching this schema:\n{json.dumps(schema_json, indent=2)}"
+    )
+
     full_system = (system_prompt or "") + json_instruction
-    
+
     for attempt in range(max_retries + 1):
         try:
             response = get_completion(
                 prompt,
                 system_prompt=full_system,
                 config=cfg,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
-            
+
             # Parse and validate
             data = json.loads(response)
             return schema.model_validate(data)
-            
+
         except json.JSONDecodeError as e:
             if attempt == max_retries:
                 raise ValueError(f"Failed to parse JSON after {max_retries + 1} attempts: {e}")
             logger.warning(f"JSON parse error (attempt {attempt + 1}): {e}")
-            
+
         except Exception as e:
             if attempt == max_retries:
                 raise ValueError(f"Schema validation failed after {max_retries + 1} attempts: {e}")
             logger.warning(f"Validation error (attempt {attempt + 1}): {e}")
-    
+
     raise ValueError("Unexpected error in get_completion_with_schema")

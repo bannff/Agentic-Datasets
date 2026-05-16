@@ -32,11 +32,11 @@ def create_llm_config(
     legacy_config: Optional[Dict[str, Any]] = None,
 ) -> LLMConfig:
     """Create LLMConfig with legacy parameter support.
-    
+
     Args:
         llm_config: Primary config dict
         legacy_config: Deprecated config dict (fallback if llm_config is None)
-    
+
     Returns:
         LLMConfig instance
     """
@@ -56,23 +56,23 @@ def parse_json_from_response(
     default: Optional[T] = None,  # type: ignore[type-var]
 ) -> Union[Dict[str, Any], List[Any], T]:
     """Extract JSON from an LLM response that may contain markdown.
-    
+
     Handles common LLM output patterns:
     - ```json ... ``` code blocks
     - ``` ... ``` generic code blocks
     - Raw JSON strings
-    
+
     Args:
         text: Raw LLM response text
         expected_type: "object" for dict, "array" for list
         default: Value to return on parse failure
-    
+
     Returns:
         Parsed JSON or default value
     """
     if not text:
         return default if default is not None else ({} if expected_type == "object" else [])  # type: ignore[return-value]
-    
+
     # Try markdown JSON block first
     json_match = re.search(r"```json\s*([\s\S]*?)\s*```", text)
     if json_match:
@@ -80,7 +80,7 @@ def parse_json_from_response(
             return json.loads(json_match.group(1))
         except json.JSONDecodeError:
             pass
-    
+
     # Try generic code block
     code_match = re.search(r"```\s*([\s\S]*?)\s*```", text)
     if code_match:
@@ -88,13 +88,13 @@ def parse_json_from_response(
             return json.loads(code_match.group(1))
         except json.JSONDecodeError:
             pass
-    
+
     # Try raw JSON
     try:
         return json.loads(text.strip())
     except json.JSONDecodeError:
         pass
-    
+
     # Return default
     return default if default is not None else ({} if expected_type == "object" else [])  # type: ignore[return-value]
 
@@ -122,29 +122,29 @@ def format_messages_for_prompt(
     max_messages: Optional[int] = None,
 ) -> str:
     """Format conversation messages for use in a prompt.
-    
+
     Args:
         messages: List of Message objects
         include_tool_calls: Whether to include tool call information
         max_messages: Maximum number of messages to include (None = all)
-    
+
     Returns:
         Formatted string representation
     """
     lines: List[str] = []
     msgs = messages[:max_messages] if max_messages else messages
-    
+
     for msg in msgs:
         role = msg.role.upper()
         content = msg.content or ""
-        
+
         if include_tool_calls and msg.tool_calls:
             tool_names: List[str] = [tc.name for tc in msg.tool_calls]
             tool_info = ", ".join(tool_names)
             lines.append(f"{role} (tools: {tool_info}): {content}")
         else:
             lines.append(f"{role}: {content}")
-    
+
     return "\n".join(lines)
 
 
@@ -159,12 +159,12 @@ def update_record_metadata(
     **kwargs: Any,
 ) -> Dict[str, Any]:
     """Create updated metadata dict for a record.
-    
+
     Args:
         record: Source conversation record
         stage_name: Name of the processing stage
         **kwargs: Additional metadata fields
-    
+
     Returns:
         New metadata dict (does not modify original)
     """
@@ -181,15 +181,15 @@ def create_passthrough_record(
     **extra_meta: Any,
 ) -> ConversationRecord:
     """Create a passthrough copy of a record with stage metadata.
-    
+
     Use when a record should pass through unchanged but with tracking info.
-    
+
     Args:
         record: Source record
         stage_name: Name of the stage
         via: Processing method indicator
         **extra_meta: Additional metadata
-    
+
     Returns:
         New ConversationRecord with updated metadata
     """
@@ -209,22 +209,23 @@ def create_passthrough_record(
 
 class StageDefaults:
     """Default configuration values for stages.
-    
+
     Centralizes magic numbers and default settings.
     """
+
     # Temperature settings by task type
     TEMPERATURE_CREATIVE = 0.8  # High diversity (agentinstruct variants)
     TEMPERATURE_BALANCED = 0.7  # Moderate (multi-turn expansion)
     TEMPERATURE_FOCUSED = 0.5  # Lower variance (tool injection)
     TEMPERATURE_PRECISE = 0.3  # Minimal variance (review/validation)
-    
+
     # Token limits
-    MAX_TOKENS_SHORT = 256   # Brief responses
+    MAX_TOKENS_SHORT = 256  # Brief responses
     MAX_TOKENS_MEDIUM = 512  # Standard responses
-    MAX_TOKENS_LONG = 1024   # Detailed responses
+    MAX_TOKENS_LONG = 1024  # Detailed responses
     MAX_TOKENS_MULTI = 2048  # Multi-turn conversations
-    
+
     # Processing thresholds
-    MIN_CONTENT_LENGTH = 10      # Minimum chars for meaningful content
-    MAX_TOOL_CALLS_PER_MSG = 2   # Maximum tool calls to inject per message
-    DIVERSITY_THRESHOLD = 0.3   # Minimum Jaccard diversity for dedup
+    MIN_CONTENT_LENGTH = 10  # Minimum chars for meaningful content
+    MAX_TOOL_CALLS_PER_MSG = 2  # Maximum tool calls to inject per message
+    DIVERSITY_THRESHOLD = 0.3  # Minimum Jaccard diversity for dedup
